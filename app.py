@@ -143,8 +143,7 @@ Run this to run the app.
     st.write("total number of queries saved on (",file_name, ")is",len(df))
     st.write("Click save to download")
     if st.button("Save"):
-        files.download(file_name)
-        
+        files.download(file_name)   
     
 # <---- Classes ---->
 class RestClient:
