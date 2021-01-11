@@ -1,0 +1,6 @@
+streamlit
+fake-useragent
+plotly == 4.5
+google
+trafilatura
+transformers == 3.5.0
