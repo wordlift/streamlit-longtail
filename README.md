@@ -5,7 +5,7 @@ This is the repository for the streamlit web application of the the long-tail qu
 ```python
 $ python3.7 -m venv ~/.streamlit_ve  
 
-$ source ~/.streamlit_ve/bin/activate.  
+$ source ~/.streamlit_ve/bin/activate  
 
 $ pip install -U pip  
 
