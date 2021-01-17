@@ -34,31 +34,6 @@ PAGE_CONFIG = {
     }
 st.set_page_config(**PAGE_CONFIG)
 
-# these has to change, they have to be according to user choice in the sidebar, but for now im using these because they are easier
-language = 'en'
-country = 'us'
-WL_key = 'F2Td1mgTjbwuGlxq4pSQa0poicP4irsQAroaZYfVkbgBCBWbheLukNAgYbX22CZa'
-
-#     if st.sidebar.button("Enter"):
-#         if WL_key.strip():  # the way we test here has to change, to make sure the key exists or not, also green and red
-#             st.sidebar.write("WordLift Key (", WL_key, ") is valid")
-#             lang_option = st.sidebar.selectbox("Select Language", language)
-#             country_option = st.sidebar.selectbox("Select Country", country)
-#             if st.sidebar.button("Submit"): # i thinnk there should be a check here too
-#                 st.sidebar.Write("something")
-#         else:
-#             st.sidebar.write("* WordLift Key (", WL_key, ") is invalid")
-#
-#     if st.sidebar.button("Enter"):
-#         if WL_key.strip():  # the way we test here has to change, to make sure the email exists or not, also green and red
-#             st.sidebar.write("WordLift Key (", WL_key, ") is valid")
-#             lang_option = st.sidebar.selectbox("Select Language", language)
-#             country_option = st.sidebar.selectbox("Select Country", country)
-#             if st.sidebar.button("Submit"): # i thinnk there should be a check here too
-#                 st.sidebar.Write("something")
-#         else:
-#             st.sidebar.write("* WordLift Key (", WL_key, ") is invalid")
-
 # <--- Main Function --->
 def main():
     """Streamlit encourages execution in a main() function. Run this to run the app"""
@@ -93,7 +68,7 @@ def main():
             "Type your third idea here:", "e.g., Artificial Intelligence"
         )
 
-    # these also has to change, they have to be according to user input, but for now im using these because they are easier and faster
+    # these have to change, they have to be according to user input, but for now im using these because they are easier and faster
     keyword_list = 'seo, structured data'
     keyword_list = keyword_list.strip('][').split(', ')
 
