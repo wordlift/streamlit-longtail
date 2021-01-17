@@ -1,6 +1,8 @@
 streamlit
 fake-useragent
-plotly == 4.5
-google
+plotly
+transformers==3.5.0
 trafilatura
-transformers == 3.5.0
+google
+google-colab
+pandas==1.1.5
