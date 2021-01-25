@@ -18,14 +18,17 @@ How to change text color:
 st.markdown(""" <span style="color:red"> text in red </span> """, unsafe_allow_html=True)
 ```
 
-Main Files: Project Structure
-├── README.md
-├── app.py *** the main driver of the app. 
-├── utils.py ***
-├── requirements.txt *** The dependencies we need to install with "pip install -r requirements.txt"
-└── static
-    ├── style.css 
-    ├── index.html
-    ├── font
-    └── img
+### Main Files: Project Structure
+
+  ```sh
+  ├── README.md
+  ├── app.py *** the main driver of the app. 
+  ├── utils.py ***
+  ├── requirements.txt *** The dependencies we need to install with "pip install -r requirements.txt"
+  └── static
+      ├── style.css 
+      ├── index.html
+      ├── font
+      └── img
+  ```
     
