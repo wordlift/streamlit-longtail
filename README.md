@@ -22,8 +22,8 @@ st.markdown(""" <span style="color:red"> text in red </span> """, unsafe_allow_h
 
   ```sh
   ├── README.md
-  ├── app.py *** the main driver of the app. 
-  ├── utils.py ***
+  ├── streamlit_app.py *** the main driver of the app. 
+  ├── utils.py *** classes, functions, statements, etc
   ├── requirements.txt *** The dependencies we need to install with "pip install -r requirements.txt"
   └── static
       ├── style.css 
