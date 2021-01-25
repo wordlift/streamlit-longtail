@@ -86,7 +86,34 @@ with col3:
     st.markdown("""What is the **third idea**?""")
     third_idea = st.text_area("Type your 3rd intent here...")
 # (Small=20, Medium=40 and Large=100) better be like this
-x = st.slider("How many long-tail queries do you prefer? Please specify below, then press Go!",10,150,100)
+# x = st.slider("How many long-tail queries do you prefer? Please specify below, then press Go!",10,150,100)
+# x = st.slider("Please specify preferred queries list size, then press Go!", Small=10, Large=100, Medium=40)
+# y = 'abcdefg'
+# z = y[:x]
+# st.markdown(z)
+
+size = ["Small", "Medium", "Large"]
+# # size_navigation = st.radio("Please specify preferred queries list size, then press Go!", sizes)
+# rad1, rad2, rad3 = st.beta_columns(3)
+# with rad1:
+#     st.success("First radio button here")
+#     size_navigation = st.radio("", sizes[0])
+# with rad2:
+#     st.success("Second radio button here")
+#     size_navigation = st.radio("", sizes[1])
+# with rad3:
+#     st.success("Last radio button here")
+#     size_navigation = st.radio("", sizes[2])
+
+# st.markdown("""<style>div.row-widget.stRadio > div{flex-direction:row;}</style>""", unsafe_allow_html=True)
+
+size_navigation = st.selectbox("Please specify preferred queries list size, then press Go!", size)
+if size == 'Small':
+    x = 10
+elif size == 'Medium':
+    x = 40
+else:
+    x = 100
 
 # <--- CSS --->
 # st.markdown('<style>' + open('style.css').read() + '</style>', unsafe_allow_html=True)
@@ -149,45 +176,13 @@ def generate_keywords(query):
 # <--- Main Function --->
 def main():
 
-    # placing these here because we need the wl key, not the best option but works for now
-    @st.cache(allow_output_mutation=True, show_spinner=False)
-    def string_to_entities(text, language=language, key=WL_key):
-        entities = wl_nlp(text,language, key)
-        entity_data = entities[0]
-        type_data = entities[1]
-        return entity_data, type_data
-
-    @st.cache(show_spinner=False)
-    def wl_nlp(text, language, key):
-        #API_URL = "https://api.wordlift.io/analysis/single"
-        API_URL = "https://api-dev.wordlift.io/analysis/single"
-        # preparing the data for the analysis
-        data_in = {
-            "content": text,
-            "annotations": {},
-            "contentLanguage": language,
-            "contentType": "text",
-            "exclude": [],
-            "scope": "local"} # change this to "global" for all entities or to "local" to use only entities from the local KG
-    	  # adding headers and the key
-        headers_in = {
-                "Content-Type": "application/json;charset=UTF-8",
-                "Accept": "application/json;charset=UTF-8",
-                "Authorization" : "Key " + key}
-        response = requests.post(API_URL, headers = headers_in, json=data_in)
-        if response.ok: # make sure connection is fine
-            json_response = json.loads(response.text) # read the json response
-            json_response = json_response.get('entities') # select "entities"
-            entity_data = []
-            type_data = []
-
-            for key in json_response:
-               entity_data.append(json_response[key]['label']) # creating the list for labels
-               type_data.append(json_response[key]['mainType']) # creating the list for types
-
-        return entity_data, type_data
-
     if api_option == 'Run NER with WordLift':
+        @st.cache(allow_output_mutation=True, show_spinner=False)
+        def string_to_entities(text, language=language, key=WL_key):
+            entities = wl_nlp(text,language, key)
+            entity_data = entities[0]
+            type_data = entities[1]
+            return entity_data, type_data
         if st.button("Go!"):
 
             # 1- if users enter no ideas then press go(all are empty strings), they get an error.
@@ -312,6 +307,12 @@ def main():
                     st.markdown(csv_download_button, unsafe_allow_html=True)
 
     elif api_option == 'Run NER with SpaCy':
+        @st.cache(allow_output_mutation=True, show_spinner=False)
+        def string_to_entities(text):
+            entities = nlp(text)
+            entity_data = [x.text for x in entities.ents]
+            type_data = [x.label_ for x in entities.ents]
+            return entity_data, type_data
         if st.button("Go!"):
             # step1
             st.markdown("Thanks! We'll unleash our **superpowers** and find the best long tail queries for these intents.")
@@ -453,11 +454,39 @@ def st_html(calc_html,width=700,height=500):
     components.html(page,width=width,height=height,scrolling=False)
 
 # <--- Functions --->
-@st.cache(allow_output_mutation=True, show_spinner=False)
-def string_to_entities(text):
-    entities = nlp(text)
-    entity_data = [x.text for x in entities.ents]
-    type_data = [x.label_ for x in entities.ents]
+
+
+# placing these here because we need the wl key, not the best option but works for now
+
+
+@st.cache(show_spinner=False)
+def wl_nlp(text, language, key):
+    #API_URL = "https://api.wordlift.io/analysis/single"
+    API_URL = "https://api-dev.wordlift.io/analysis/single"
+    # preparing the data for the analysis
+    data_in = {
+        "content": text,
+        "annotations": {},
+        "contentLanguage": language,
+        "contentType": "text",
+        "exclude": [],
+        "scope": "local"} # change this to "global" for all entities or to "local" to use only entities from the local KG
+      # adding headers and the key
+    headers_in = {
+            "Content-Type": "application/json;charset=UTF-8",
+            "Accept": "application/json;charset=UTF-8",
+            "Authorization" : "Key " + key}
+    response = requests.post(API_URL, headers = headers_in, json=data_in)
+    if response.ok: # make sure connection is fine
+        json_response = json.loads(response.text) # read the json response
+        json_response = json_response.get('entities') # select "entities"
+        entity_data = []
+        type_data = []
+
+        for key in json_response:
+           entity_data.append(json_response[key]['label']) # creating the list for labels
+           type_data.append(json_response[key]['mainType']) # creating the list for types
+
     return entity_data, type_data
 
 @st.cache(show_spinner=False)
