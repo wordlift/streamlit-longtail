@@ -1,0 +1,18 @@
+body {
+    background-color: lightblue;
+}
+
+button {
+    border-radius: 4px;
+    background-color: #f4511e;
+    color: #FFFFFF;
+    text-align: center;
+    padding: 20px;
+    transition: all 0.5s;
+    margin: 5px;
+}
+
+/* .fullScreenFrame > div {
+    display: flex;
+    justify-content: center;
+} */
