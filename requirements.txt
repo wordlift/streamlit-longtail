@@ -1,9 +1,0 @@
-streamlit
-fake-useragent
-plotly==4.5
-pandas==1.1.5
-transformers==3.5.0
-trafilatura
-google
-spacy==2.2
-https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.2.0/en_core_web_sm-2.2.0.tar.gz#egg=en_core_web_sm
