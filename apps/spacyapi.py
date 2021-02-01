@@ -5,56 +5,23 @@ import numpy as np
 import plotly.express as px
 import spacy
 import en_core_web_sm
-import requests
 import json
 import re
-import time
-from random import randint
-from fake_useragent import UserAgent
 from http.client import HTTPSConnection
 from json import loads
 from json import dumps
 from pandas import json_normalize
 from pandas import Series
-from collections import Counter
+# from collections import Counter
 
 from functions.download import download_button
 from functions.interface import *
+from functions.generate import *
 
 language = ''
 country = ''
 WL_key = ''
-x = 0
-
-@st.cache(show_spinner=False)
-def autocomplete(query):
-    ua = UserAgent(verify_ssl=False)
-    tld = country
-    lan = language
-    time.sleep(randint(0, 2))
-    URL = 'http://suggestqueries.google.com/complete/search?client=firefox&gl={0}&q={1}&hl={2}'.format(tld,query,lan)
-    headers = {'User-agent':ua.random}
-    response = requests.get(URL, headers=headers)
-    result = json.loads(response.content.decode('utf-8'))
-    return result[1]
-
-@st.cache(suppress_st_warning=True, show_spinner=False)
-def generate_keywords(query):
-    seed = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
-            'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-            '1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
-    st.write('Grabbing suggestions for ... ' + str(query))
-    first_pass = autocomplete(query)
-    second_pass = [autocomplete(x) for x in first_pass]
-    flat_second_pass = []
-    flat_second_pass = [query for sublist in second_pass for query in sublist]
-    third_pass = [autocomplete(query + ' ' + x) for x in seed]
-    flat_third_pass = []
-    flat_third_pass = [query for sublist in third_pass for query in sublist]
-    keyword_suggestions = list(set(first_pass + flat_second_pass + flat_third_pass))
-    keyword_suggestions.sort()
-    st.write('SUCCESS!')
-    return keyword_suggestions
+list_size = 0
 
 def app():
     # <-- UI -->
@@ -117,7 +84,7 @@ def app():
         df = df.head(list_size)
         df['entities'] = ''
         df['types'] = ''
-        progress_bar()
+        progress_bar(list_size)
         balloons("list of queries")
         st.dataframe(df['queries'])
 
@@ -187,7 +154,7 @@ def app():
         fig = px.treemap(df6, path=['all','entities','queries'], values='search_volume', color='search_volume', color_continuous_scale='Blues')
         fig = px.treemap(df6, path=['all','entities','queries'], values='competition', color='competition', color_continuous_scale='purpor')
         fig = px.treemap(df6, path=['all','entities','queries'], values='search_volume', color='competition', color_continuous_scale='blues', color_continuous_midpoint=np.average(df6['competition'], weights=df6['search_volume']))
-        progress_bar()
+        progress_bar(list_size)
         balloons("treemap")
         st.plotly_chart(fig)
 
@@ -197,8 +164,8 @@ def app():
         cleanQuery = re.sub('\W+','', keyword_list[0])
         file_name = cleanQuery + ".csv"
         df.to_csv(file_name, encoding='utf-8', index=True)
-        csv_download_button = download_button(df, file_name, 'Click to download your data!')
-        progress_bar()
+        csv_download_button = download_button(df, file_name, 'Download')
+        progress_bar(list_size)
         balloons("CSV")
         st.write("Total number of queries saved on (",file_name, ")is",len(df))
         st.markdown(csv_download_button, unsafe_allow_html=True)

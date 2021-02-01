@@ -1,5 +1,5 @@
 ## WordLift's Search Intent Inspector Streamlit App
-This is the repository for the streamlit web application of the the long-tail query inspector. 
+This is the repository for the streamlit web application of the the long-tail query inspector.
 A tool meant to help you find new query opportunities.
 
 
@@ -28,7 +28,7 @@ $ streamlit run app.py
   ```sh
   .
   ├── README.md
-  ├── app.py
+  ├── app.py *** driver of the app
   ├── apps
   │   ├── spacyapi.py
   │   └── wordliftapi.py
@@ -39,7 +39,7 @@ $ streamlit run app.py
   │   ├── fav-ico.png
   │   ├── logo-wordlift.png
   │   └── pattern.png
-  ├── multiapp.py
-  ├── requirements.txt
-  └── style.css 
+  ├── multiapp.py *** framework
+  ├── requirements.txt *** The dependencies we need to install with "pip install -r requirements.txt"
+  └── style.css
   ```

@@ -1,11 +1,11 @@
 import streamlit as st
+import pandas as pd
 import base64
 import os
 import json
 import pickle
 import uuid
 import re
-import pandas as pd
 
 @st.cache(show_spinner=False)
 def download_button(object_to_download, download_filename, button_text, pickle_it=False):
@@ -63,19 +63,25 @@ def download_button(object_to_download, download_filename, button_text, pickle_i
     custom_css = f"""
         <style>
             #{button_id} {{
+                width: 150px;
+                height: 50px;
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;
-                background-color: rgb(255, 255, 255);
-                color: rgb(38, 39, 48);
+                background-color: #ff8401;
+                color: #fbfbfb;
                 padding: .25rem .75rem;
                 position: relative;
                 text-decoration: none;
-                border-radius: 4px;
+                border-radius: 6px;
                 border-width: 1px;
                 border-style: solid;
                 border-color: rgb(230, 234, 241);
                 border-image: initial;
+                box-shadow: 0 8px 18px 0 rgba(255, 132, 1, 0.26);
+                font-stretch: normal;
+                font-style: normal;
+                letter-spacing: normal;
             }}
             #{button_id}:hover {{
                 border-color: rgb(246, 51, 102);
