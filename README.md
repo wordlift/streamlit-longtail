@@ -10,8 +10,8 @@ $ cd my/directory
 ```
 2. Virtual environment:
 ```
-$ python3.7 -m venv ~/.streamlit_v
-$ source ~/.streamlit_v5/bin/activate
+$ python3.7 -m venv ~/.streamlit_ve
+$ source ~/.streamlit_ve/bin/activate
 ```
 3. Install dependencies:
 ```
@@ -26,12 +26,20 @@ $ streamlit run app.py
 
 ## Main Files: Project Structure
   ```sh
+  .
   ├── README.md
-  ├── requirements.txt *** The dependencies we need to install with "pip install -r requirements.txt"
-  ├── app.py *** driver of the app
-  ├── multiapp.py *** framework
+  ├── app.py
+  ├── apps
+  │   ├── spacyapi.py
+  │   └── wordliftapi.py
+  ├── functions
+  │   ├── download.py
+  │   └── interface.py
   ├── img
-  └── apps
-      ├── wordliftapi.py
-      └── spacyapi.py
+  │   ├── fav-ico.png
+  │   ├── logo-wordlift.png
+  │   └── pattern.png
+  ├── multiapp.py
+  ├── requirements.txt
+  └── style.css 
   ```
