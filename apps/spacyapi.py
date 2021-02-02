@@ -27,7 +27,9 @@ def app():
     # <-- UI -->
     local_css("style.css")
     set_png_as_page_bg('img/pattern.png')
-    st.title('SpaCy API')
+    st.title('Content Idea Generator')
+    st.header('Get instant, untapped content ideas')
+    st.info('WordLift will “read” autocomplete data from Google, scan it using the Knowledge Graph from your website (or the SpaCy API) then quickly analyze every search opportunity to help you create super-useful content.”')
     col1, col2, col3 = st.beta_columns(3)
     with col1:
         languages = ["en", "it", "es", "de"]

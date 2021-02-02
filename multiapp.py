@@ -49,5 +49,7 @@ class MultiApp:
             'API:',
             self.apps,
             format_func=lambda app: app['title'])
+        st.sidebar.title("About")
+        st.sidebar.info('WordLift will “read” autocomplete data from Google, scan it using the Knowledge Graph from your website (or the SpaCy API) then quickly analyze every search opportunity to help you create super-useful content.” ')
 
         app['function']()
