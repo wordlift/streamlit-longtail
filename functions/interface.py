@@ -18,10 +18,10 @@ def set_png_as_page_bg(png_file):
     bin_str = get_base64_of_bin_file(png_file)
     page_bg_img = '''
     <style>
-    body {
-    background-image: url("data:image/png;base64,%s");
-    background-size: cover;
-    }
+        body {
+            background-image: url("data:image/png;base64,%s");
+            background-size: cover;
+        }
     </style>
     ''' % bin_str
 
@@ -29,15 +29,15 @@ def set_png_as_page_bg(png_file):
     return
 
 def progress_bar(range_size):
-    st.markdown(
-    """
-    <style>
-        .stProgress > div > div > div > div {
-            background-color: #ff8401;
-        }
-    </style>
-    """,
-    unsafe_allow_html=True)
+    # st.markdown(
+    # """
+    # <style>
+    #     .stProgress > div > div > div > div {
+    #         background-color: #ff8401;
+    #     }
+    # </style>
+    # """,
+    # unsafe_allow_html=True)
 
     for _ in stqdm(range(range_size), desc="This is a slow task, please be patient"):
         sleep(1)

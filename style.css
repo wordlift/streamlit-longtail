@@ -2,6 +2,21 @@ body {
     background-color: rgb(245, 250, 255);
 }
 
+.css-1aumxhk {
+    /* padding: 1em 2em;
+    height: 80px;
+    width: 98%;
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    bottom: 5px;
+    left: 5px;
+    background-color: #ffffff;
+    background-image: none;
+    color: #ffffff */
+    background-image: linear-gradient(#2e7bcf,#2e7bcf);
+}
+
 .stButton>button {
     width: 150px;
     height: 50px;
@@ -12,4 +27,81 @@ body {
     font-style: normal;
     letter-spacing: normal;
     color: #fbfbfb;
+}
+
+.stButton>button:hover {
+    border-color: transparent;
+    color: #fbfbfb;
+    opacity: 0.75;
+}
+
+.stButton>button:active {
+    background-color: #ff8401;
+    color: #fbfbfb;
+}
+
+div.row-widget.stRadio > div {
+    color: #33a2c6;
+    flex-direction: row;
+    align-items: stretch;
+}
+
+.stProgress > div > div > div > div {
+    background-color: #ff8401;
+}
+
+@font-face {
+  font-family: WordLiftFont;
+  src: url('fonts/gothamblack.woff2') format('woff2'),
+       url('fonts/gothambold.woff2') format('woff2'),
+       url('fonts/gothambook.woff2') format('woff2'),
+       url('fonts/gothamlight.woff2') format('woff2'),
+       url('fonts/gothammedium.woff2') format('woff2');
+}
+
+.subject {
+    /* font-family: WordLiftFont; */
+    font-size: 50px;
+    font-weight: bold;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: 1.18;
+    letter-spacing: normal;
+    /* text-align: center; */
+    color: rgba(0, 0, 0, 0.85);
+}
+
+.payoff {
+    /* font-family: WordLiftFont; */
+    font-size: 30px;
+    font-weight: normal;
+    font-stretch: normal;
+    font-style: normal;
+    /* line-height: 2.76; */
+    letter-spacing: normal;
+    /* text-align: center; */
+    color: #000000;
+}
+
+.question {
+    /* font-family: WordLiftFont; */
+    font-size: 20px;
+    font-weight: bold;
+    font-stretch: normal;
+    font-style: normal;
+    /* line-height: 2.76; */
+    letter-spacing: normal;
+    /* text-align: center; */
+    color: #000000;
+}
+.answer {
+    /* font-family: WordLiftFont; */
+    font-size: 15px;
+    font-weight: normal;
+    font-stretch: normal;
+    font-style: normal;
+    /* line-height: 2.76; */
+    letter-spacing: normal;
+    /* text-align: center; */
+    color: grey;
 }

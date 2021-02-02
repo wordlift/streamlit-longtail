@@ -24,9 +24,19 @@ def app():
     # <-- UI -->
     local_css("style.css")
     set_png_as_page_bg('img/pattern.png')
-    st.title('Content Idea Generator')
-    st.header('Get instant, untapped content ideas')
-    st.write('> WordLift will “read” autocomplete data from Google, scan it using the Knowledge Graph from your website (or the SpaCy API) then quickly analyze every search opportunity to help you create super-useful content.”')
+    st.markdown('<p class="subject"> Content Idea Generator </p>', unsafe_allow_html=True)
+    st.markdown('<p class="payoff"> Get instant, untapped content ideas </p>', unsafe_allow_html=True)
+    st.text('')
+    st.markdown('<p class="question"> How does this work? </p>', unsafe_allow_html=True)
+    st.markdown(
+    """
+    <p class="answer"> 
+        WordLift will “read” autocomplete data from Google, scan it using the
+        Knowledge Graph from your website (or the SpaCy API) then quickly analyze
+        every search opportunity to help you create super-useful content.”
+    </p>
+    """,
+    unsafe_allow_html=True)
     col1, col2, col3 = st.beta_columns(3)
     with col1:
         languages = ["en", "it", "es", "de"]
@@ -39,8 +49,9 @@ def app():
     with col3:
         WL_key_ti = st.text_input("Enter your WordLift key")
         third_idea = st.text_input("What is the third idea?")
-    size = ["Small (10 Queries)", "Medium (40 Queries)", "Large (100 Queries)"]
-    size_navigation = st.selectbox("Please specify preferred queries list size, then press GO!", size)
+    st.text("")
+    size = ['Small (10 Queries)', 'Medium (40 Queries)', 'Large (100 Queries)']
+    size_navigation = st.radio('Please specify preferred queries list size, then press GO!', size)
     go_button = st.button("GO!")
 
     if go_button:
