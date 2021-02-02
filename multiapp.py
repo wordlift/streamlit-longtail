@@ -51,5 +51,6 @@ class MultiApp:
             format_func=lambda app: app['title'])
         st.sidebar.title("About")
         st.sidebar.info('WordLift will “read” autocomplete data from Google, scan it using the Knowledge Graph from your website (or the SpaCy API) then quickly analyze every search opportunity to help you create super-useful content.” ')
+        st.sidebar.info("You will need a WordLift key. You can [get one for free](https://wordlift.io/checkout/) for 14 days.")
 
         app['function']()

@@ -26,19 +26,19 @@ def app():
     set_png_as_page_bg('img/pattern.png')
     st.title('Content Idea Generator')
     st.header('Get instant, untapped content ideas')
-    st.info('WordLift will “read” autocomplete data from Google, scan it using the Knowledge Graph from your website (or the SpaCy API) then quickly analyze every search opportunity to help you create super-useful content.”')
+    st.write('> WordLift will “read” autocomplete data from Google, scan it using the Knowledge Graph from your website (or the SpaCy API) then quickly analyze every search opportunity to help you create super-useful content.”')
     col1, col2, col3 = st.beta_columns(3)
     with col1:
         languages = ["en", "it", "es", "de"]
         lang_option = st.selectbox("Select Language", languages)
-        first_idea = st.text_area("What is the first idea?")
+        first_idea = st.text_input("What is the first idea?")
     with col2:
         countries = ["us", "uk", "in", "es", "it", "de"]
         country_option = st.selectbox("Select Country", countries)
-        second_idea = st.text_area("What is the second idea?")
+        second_idea = st.text_input("What is the second idea?")
     with col3:
         WL_key_ti = st.text_input("Enter your WordLift key")
-        third_idea = st.text_area("What is the third idea?")
+        third_idea = st.text_input("What is the third idea?")
     size = ["Small (10 Queries)", "Medium (40 Queries)", "Large (100 Queries)"]
     size_navigation = st.selectbox("Please specify preferred queries list size, then press GO!", size)
     go_button = st.button("GO!")
