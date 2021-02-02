@@ -174,7 +174,7 @@ def app():
         # 3- download csv file
         st.subheader("3- CSV")
         st.markdown("Please wait while we prepare your CSV file...")
-        cleanQuery = re.sub('\W+','', keyword_list[0])
+        cleanQuery = re.sub('\W+','', keyword_list)
         file_name = cleanQuery + ".csv"
         df.to_csv(file_name, encoding='utf-8', index=True)
         csv_download_button = download_button(df, file_name, 'Download')

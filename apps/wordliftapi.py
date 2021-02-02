@@ -30,7 +30,7 @@ def app():
     st.markdown('<p class="question"> How does this work? </p>', unsafe_allow_html=True)
     st.markdown(
     """
-    <p class="answer"> 
+    <p class="answer">
         WordLift will “read” autocomplete data from Google, scan it using the
         Knowledge Graph from your website (or the SpaCy API) then quickly analyze
         every search opportunity to help you create super-useful content.”
@@ -193,7 +193,7 @@ def app():
         # 3- download csv file
         st.subheader("3- CSV")
         st.markdown("Please wait while we prepare your CSV file...")
-        cleanQuery = re.sub('\W+','', keyword_list[0])
+        cleanQuery = re.sub('\W+','', keyword_list)
         file_name = cleanQuery + ".csv"
         df.to_csv(file_name, encoding='utf-8', index=True)
         csv_download_button = download_button(df, file_name, 'Download')

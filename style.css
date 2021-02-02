@@ -14,7 +14,7 @@ body {
     background-color: #ffffff;
     background-image: none;
     color: #ffffff */
-    background-image: linear-gradient(#2e7bcf,#2e7bcf);
+    /* background-image: linear-gradient(#2e7bcf,#2e7bcf); */
 }
 
 .stButton>button {
@@ -48,6 +48,20 @@ div.row-widget.stRadio > div {
 
 .stProgress > div > div > div > div {
     background-color: #ff8401;
+}
+
+.stTextInput > div > div > input {
+    background-color: #ffffff;
+    /* border-color: : #ffffff; */
+    box-shadow: 0 8px 18px 0 rgba(0, 8, 18, 0.05);
+}
+
+div[role="listbox"] ul {
+    background-color: #ffffff;
+}
+
+div[role="listbox"] ul:first {
+    background-color: #ffffff;
 }
 
 @font-face {
