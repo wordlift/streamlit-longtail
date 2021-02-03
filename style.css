@@ -18,6 +18,7 @@ body {
 }
 
 .stButton>button {
+    border-color: rgb(230, 234, 241);
     width: 150px;
     height: 50px;
     border-radius: 6px;
@@ -30,20 +31,24 @@ body {
 }
 
 .stButton>button:hover {
-    border-color: transparent;
+    border-color: rgb(230, 234, 241);
     color: #fbfbfb;
     opacity: 0.75;
 }
 
 .stButton>button:active {
+    border-color: rgb(230, 234, 241);
     background-color: #ff8401;
     color: #fbfbfb;
 }
 
 div.row-widget.stRadio > div {
-    color: #33a2c6;
     flex-direction: row;
     align-items: stretch;
+}
+
+div.row-widget.stRadio > div::after {
+    background-color: blue;
 }
 
 .stProgress > div > div > div > div {
@@ -60,7 +65,7 @@ div[role="listbox"] ul {
     background-color: #ffffff;
 }
 
-div[role="listbox"] ul:first {
+div[role="listbox"] option:first-child {
     background-color: #ffffff;
 }
 
