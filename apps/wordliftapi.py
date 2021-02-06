@@ -12,6 +12,7 @@ from functions.download import download_button
 from functions.interface import *
 from functions.generate import *
 from functions.restclient import RestClient
+from functions.NER_wl import *
 
 language = ''
 country = ''
@@ -103,35 +104,35 @@ def app():
         df['types'] = ''
 
         # inner function
-        @st.cache(show_spinner=False)
-        def wl_nlp(text, language, key):
-            API_URL = "https://api.wordlift.io/analysis/single"
-            data_in = {
-                "content": text, "annotations": {},
-                "contentLanguage": language, "contentType": "text",
-                "exclude": [], "scope": "local"}
-            headers_in = {
-                    "Content-Type": "application/json;charset=UTF-8",
-                    "Accept": "application/json;charset=UTF-8",
-                    "Authorization" : "Key " + key}
-            response = requests.post(API_URL, headers = headers_in, json=data_in)
-            if response.ok:
-                json_response = json.loads(response.text)
-                json_response = json_response.get('entities')
-                entity_data = []
-                type_data = []
-                for key in json_response:
-                   entity_data.append(json_response[key]['label'])
-                   type_data.append(json_response[key]['mainType'])
-            return entity_data, type_data
+        # @st.cache(show_spinner=False)
+        # def wl_nlp(text, language, key):
+        #     API_URL = "https://api.wordlift.io/analysis/single"
+        #     data_in = {
+        #         "content": text, "annotations": {},
+        #         "contentLanguage": language, "contentType": "text",
+        #         "exclude": [], "scope": "local"}
+        #     headers_in = {
+        #             "Content-Type": "application/json;charset=UTF-8",
+        #             "Accept": "application/json;charset=UTF-8",
+        #             "Authorization" : "Key " + key}
+        #     response = requests.post(API_URL, headers = headers_in, json=data_in)
+        #     if response.ok:
+        #         json_response = json.loads(response.text)
+        #         json_response = json_response.get('entities')
+        #         entity_data = []
+        #         type_data = []
+        #         for key in json_response:
+        #            entity_data.append(json_response[key]['label'])
+        #            type_data.append(json_response[key]['mainType'])
+        #     return entity_data, type_data
 
         # inner function
-        @st.cache(allow_output_mutation=True, show_spinner=False)
-        def string_to_entities(text, language=language, key=WL_key):
-            entities = wl_nlp(text,language, key)
-            entity_data = entities[0]
-            type_data = entities[1]
-            return entity_data, type_data
+        # @st.cache(allow_output_mutation=True, show_spinner=False)
+        # def string_to_entities(text, language=language, key=WL_key):
+        #     entities = wl_nlp(text,language, key)
+        #     entity_data = entities[0]
+        #     type_data = entities[1]
+        #     return entity_data, type_data
 
         for index, row in df.iterrows():
             data_x = string_to_entities(df['queries'][index])
@@ -173,32 +174,36 @@ def app():
         df6 = df5.drop('entities', axis=1).join(p)
         df6['entities'] = pd.Series(df6['entities'], dtype=object)
 
-        progress_bar(list_size, pb_speed)
-        balloons("treemap")
+        # figures
+        fig1 = px.histogram(df6, x='entities').update_xaxes(categoryorder="total descending")
+
+        df6['all'] = 'all'
+        fig2 = px.treemap(df6, path=['all','types','entities','queries'], color='entities')
+
+        fig3 = px.treemap(df4_merged, path=['entities'], values='competition', color='competition', color_continuous_scale='Blues')
+
+        df6 = df6.dropna(subset=['search_volume', 'competition'])
+        fig4 = px.treemap(df6, path=['all','entities','queries'], values='search_volume', color='search_volume', color_continuous_scale='Blues')
+
+        fig5 = px.treemap(df6, path=['all','entities','queries'], values='competition', color='competition', color_continuous_scale='purpor')
+
+        fig6 = px.treemap(df6, path=['all','entities','queries'], values='search_volume', color='competition', color_continuous_scale='blues', color_continuous_midpoint=np.average(df6['competition'], weights=df6['search_volume']))
 
         chart_types = ['Top Entities', 'Intent by Type and Entity', 'Intent by Entity and Search Volume', 'Intent by Search Volume and Competition', 'Intent by Entity and Competition', 'Intent by Entity, Search Volume and Competition']
         chart_navigation = st.selectbox('Please choose preferred chart type:', chart_types)
 
-        if chart_navigation == 'Top Entities':
-            fig1 = px.histogram(df6, x='entities').update_xaxes(categoryorder="total descending")
-            st.plotly_chart(fig1)
-        elif chart_navigation == 'Intent by Type and Entity':
-            df6['all'] = 'all'
-            fig2 = px.treemap(df6, path=['all','types','entities','queries'], color='entities')
-            st.plotly_chart(fig2)
-        elif chart_navigation == 'Intent by Entity and Search Volume':
-            fig3 = px.treemap(df4_merged, path=['entities'], values='competition', color='competition', color_continuous_scale='Blues')
-            st.plotly_chart(fig3)
-        elif chart_navigation == 'Intent by Search Volume and Competition':
-            df6 = df6.dropna(subset=['search_volume', 'competition'])
-            fig4 = px.treemap(df6, path=['all','entities','queries'], values='search_volume', color='search_volume', color_continuous_scale='Blues')
-            st.plotly_chart(fig4)
-        elif chart_navigation == 'Intent by Entity and Competition':
-            fig5 = px.treemap(df6, path=['all','entities','queries'], values='competition', color='competition', color_continuous_scale='purpor')
-            st.plotly_chart(fig5)
-        elif chart_navigation == 'Intent by Entity, Search Volume and Competition':
-            fig6 = px.treemap(df6, path=['all','entities','queries'], values='search_volume', color='competition', color_continuous_scale='blues', color_continuous_midpoint=np.average(df6['competition'], weights=df6['search_volume']))
-            st.plotly_chart(fig6)
+        def switch_chart():
+            if chart_navigation == 'Top Entities': output = st.plotly_chart(fig1)
+            elif chart_navigation == 'Intent by Type and Entity': output = st.plotly_chart(fig2)
+            elif chart_navigation == 'Intent by Entity and Search Volume': output = st.plotly_chart(fig3)
+            elif chart_navigation == 'Intent by Search Volume and Competition': output = st.plotly_chart(fig4)
+            elif chart_navigation == 'Intent by Entity and Competition': output = st.plotly_chart(fig5)
+            elif chart_navigation == 'Intent by Entity, Search Volume and Competition': output = st.plotly_chart(fig6)
+            return output
+
+        switch_chart()
+        progress_bar(list_size, pb_speed)
+        balloons("treemap")
 
         # 3- download csv file
         st.subheader("3- CSV")
