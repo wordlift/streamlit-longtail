@@ -7,7 +7,7 @@ PAGE_CONFIG = {
     }
 st.set_page_config(**PAGE_CONFIG)
 
-# This will hide the hamburger menu completely.
+# This will hide the hamburger menu of streamlit completely.
 hide_streamlit_style = """
 <style>
     #MainMenu {
@@ -20,6 +20,7 @@ hide_streamlit_style = """
 </style>
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
 from multiapp import MultiApp
 from apps import wordliftapi, spacyapi
 
