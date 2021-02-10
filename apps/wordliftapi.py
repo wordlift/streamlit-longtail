@@ -17,26 +17,6 @@ from functions.NER_wl import *
 
 
 
-# az group create --name LongTailApp --location eastus
-# az acr create --resource-group LongTailApp --name LongTailAppRegistry --sku Basic
-# pip install azure-storage-blob
-# az acr build --registry LongTailAppRegistry --resource-group LongTailApp --image longtail-app https://github.com/wordlift/streamlit-longtail.git
-#
-# az appservice plan create -g LongTailApp -n LongTailAppServicePlan -l eastus --is-linux --sku B1
-#
-# az webapp create -g LongTailApp -p LongTailAppServicePlan -n longtail-web-app -i longtailappregistry.azurecr.io/longtail-app:latest
-#
-# username: LongTailAppRegistry
-# password: f=W5=bx9RlIME8Afk6v2xDAE6G7VhwZH
-# password2: wtfOjlu6x3B1P2BU/YbF5qu1IJaGtPvu
-#
-#
-# az group create --name MushroomApp --location eastus
-# az acr create --resource-group MushroomApp --name TheMushroomAppRegistry10 --sku Basic
-# pip install azure-storage-blob
-# az acr build --registry TheMushroomAppRegistry10 --resource-group MushroomApp --image mushroom-app https://github.com/RaffalShafiei/mushroom-webapp.git
-#
-
 
 # /////////////////////////
 # TEST
