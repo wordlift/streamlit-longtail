@@ -18,7 +18,7 @@ showWarningOnDirectExecution = true
 
 # Level of logging: 'error', 'warning', 'info', or 'debug'.
 # Default: 'info'
-logLevel = "debug"
+# logLevel = "debug"
 
 
 [client]
@@ -89,7 +89,7 @@ gatherUsageStats = true
 
 # Port that the browser should use to connect to the server when in liveSave mode.
 # Default: whatever value is set in server.port.
-serverPort = 80
+serverPort = 8501
 
 [s3]
 
@@ -128,3 +128,13 @@ keyPrefix = ""
 # Leave unset to use your default profile.
 # Default: (unset)
 # profile =
+
+[logger]
+
+# Level of logging: 'error', 'warning', 'info', or 'debug'.
+# Default: 'info'
+level = "debug"
+
+# String format for logging messages. If logger.datetimeFormat is set, logger messages will default to `%(asctime)s.%(msecs)03d %(message)s`. See [Python's documentation](https://docs.python.org/2.6/library/logging.html#formatter-objects) for available attributes.
+# Default: None
+messageFormat = "%(asctime)s %(levelname) -7s %(name)s: %(message)s"
