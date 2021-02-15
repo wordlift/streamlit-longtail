@@ -66,16 +66,16 @@ def app():
         # 2- query list size
         if size_navigation == 'Small (25 Queries)':
             list_size = 25 # when i tried the funds queries, 10 gave me error because treemap couldnnt it is small
-            pb_speed = 2.5
+
         elif size_navigation == 'Medium (50 Queries)':
             list_size = 50
-            pb_speed = 5
+
         elif size_navigation == 'Large (100 Queries)':
             list_size = 100
-            pb_speed = 10
+
         elif size_navigation == 'X-Large (700 Queries)':
             list_size = 700
-            pb_speed = 70
+
         # 3- keywords list
         if not (first_idea or second_idea or third_idea):
             st.error("You have not typed any ideas! Please type at least two ideas, then press GO!")
@@ -136,15 +136,16 @@ def app():
 
         df4_merged = df.merge(keyword_df, how='right', on='queries')
 
-        progress_bar(list_size, pb_speed)
+        progress_bar(list_size)
         balloons("list of queries")
         st.dataframe(df4_merged)
 
         # 2- treemap
         st.subheader("2- Treemap")
         st.markdown("Please wait while we prepare your treemap...")
+        progress_bar(list_size)
+        balloons("treemap")
 
-        # Preparing data for visualization
         s = df4_merged.apply(lambda x: pd.Series(x['types'],), axis=1).stack().reset_index(level=1, drop=True)
         s.name = 'types'
         df5 = df4_merged.drop('types', axis=1).join(s)
@@ -154,27 +155,38 @@ def app():
         df6 = df5.drop('entities', axis=1).join(p)
         df6['entities'] = pd.Series(df6['entities'], dtype=object)
 
-        progress_bar(list_size, pb_speed)
-        balloons("treemap")
+        # If i used session state or url get/set query parameters, i'll maintain the “button pushed” flag
+        # which will allow us to persist the button pushed state across runs.
+        chart_types = ['Top Entities', 'Intent by Type and Entity', 'Intent by Entity and Search Volume', 'Intent by Search Volume and Competition', 'Intent by Entity and Competition', 'Intent by Entity, Search Volume and Competition']
+        chart_navigation = st.selectbox('Please choose preferred chart type:', chart_types, index = 2)
 
         if chart_navigation == 'Top Entities':
             fig1 = px.histogram(df6, x='entities').update_xaxes(categoryorder="total descending")
             st.plotly_chart(fig1)
+
         elif chart_navigation == 'Intent by Type and Entity':
             df6['all'] = 'all'
             fig2 = px.treemap(df6, path=['all','types','entities','queries'], color='entities')
             st.plotly_chart(fig2)
+
         elif chart_navigation == 'Intent by Entity and Search Volume':
+            df6['all'] = 'all'
             fig3 = px.treemap(df4_merged, path=['entities'], values='competition', color='competition', color_continuous_scale='Blues')
             st.plotly_chart(fig3)
+
         elif chart_navigation == 'Intent by Search Volume and Competition':
+            df6['all'] = 'all'
             df6 = df6.dropna(subset=['search_volume', 'competition'])
             fig4 = px.treemap(df6, path=['all','entities','queries'], values='search_volume', color='search_volume', color_continuous_scale='Blues')
             st.plotly_chart(fig4)
+
         elif chart_navigation == 'Intent by Entity and Competition':
+            df6['all'] = 'all'
             fig5 = px.treemap(df6, path=['all','entities','queries'], values='competition', color='competition', color_continuous_scale='purpor')
             st.plotly_chart(fig5)
+
         elif chart_navigation == 'Intent by Entity, Search Volume and Competition':
+            df6['all'] = 'all'
             fig6 = px.treemap(df6, path=['all','entities','queries'], values='search_volume', color='competition', color_continuous_scale='blues', color_continuous_midpoint=np.average(df6['competition'], weights=df6['search_volume']))
             st.plotly_chart(fig6)
 

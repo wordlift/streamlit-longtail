@@ -8,128 +8,11 @@ import re
 from pandas import json_normalize
 from pandas import Series
 
-# from session_state import *
 from functions.download import download_button
 from functions.interface import *
 from functions.generate import *
 from functions.restclient import RestClient
 from functions.NER_wl import *
-
-
-
-
-# /////////////////////////
-# TEST
-# /////////////////////////
-
-from streamlit.hashing import _CodeHasher
-
-try:
-    # Before Streamlit 0.65
-    from streamlit.ReportThread import get_report_ctx
-    from streamlit.server.Server import Server
-except ModuleNotFoundError:
-    # After Streamlit 0.65
-    from streamlit.report_thread import get_report_ctx
-    from streamlit.server.server import Server
-
-def display_state_values(state):
-    st.write("Input state:", state.input)
-    st.write("Slider state:", state.slider)
-    st.write("Radio state:", state.radio)
-    st.write("Checkbox state:", state.checkbox)
-    st.write("Selectbox state:", state.selectbox)
-    st.write("Multiselect state:", state.multiselect)
-
-    for i in range(3):
-        st.write(f"Value {i}:", state[f"State value {i}"])
-
-    if st.button("Clear state"):
-        state.clear()
-
-class _SessionState:
-
-    def __init__(self, session, hash_funcs):
-        """Initialize SessionState instance."""
-        self.__dict__["_state"] = {
-            "data": {},
-            "hash": None,
-            "hasher": _CodeHasher(hash_funcs),
-            "is_rerun": False,
-            "session": session,
-        }
-
-    def __call__(self, **kwargs):
-        """Initialize state data once."""
-        for item, value in kwargs.items():
-            if item not in self._state["data"]:
-                self._state["data"][item] = value
-
-    def __getitem__(self, item):
-        """Return a saved state value, None if item is undefined."""
-        return self._state["data"].get(item, None)
-
-    def __getattr__(self, item):
-        """Return a saved state value, None if item is undefined."""
-        return self._state["data"].get(item, None)
-
-    def __setitem__(self, item, value):
-        """Set state value."""
-        self._state["data"][item] = value
-
-    def __setattr__(self, item, value):
-        """Set state value."""
-        self._state["data"][item] = value
-
-    def clear(self):
-        """Clear session state and request a rerun."""
-        self._state["data"].clear()
-        self._state["session"].request_rerun()
-
-    def sync(self):
-        """Rerun the app with all state values up to date from the beginning to fix rollbacks."""
-
-        # Ensure to rerun only once to avoid infinite loops
-        # caused by a constantly changing state value at each run.
-        #
-        # Example: state.value += 1
-        if self._state["is_rerun"]:
-            self._state["is_rerun"] = False
-
-        elif self._state["hash"] is not None:
-            if self._state["hash"] != self._state["hasher"].to_bytes(self._state["data"], None):
-                self._state["is_rerun"] = True
-                self._state["session"].request_rerun()
-
-        self._state["hash"] = self._state["hasher"].to_bytes(self._state["data"], None)
-
-
-def _get_session():
-    session_id = get_report_ctx().session_id
-    session_info = Server.get_current()._get_session_info(session_id)
-
-    if session_info is None:
-        raise RuntimeError("Couldn't get your Streamlit Session object.")
-
-    return session_info.session
-
-
-def _get_state(hash_funcs=None):
-    session = _get_session()
-
-    if not hasattr(session, "_custom_session_state"):
-        session._custom_session_state = _SessionState(session, hash_funcs)
-
-    return session._custom_session_state
-
-# /////////////////////////
-# TEST
-# /////////////////////////
-
-
-
-
-
 
 language = ''
 country = ''
@@ -297,10 +180,52 @@ pb_speed = 0.0
 #     elif chart_navigation == 'Intent by Entity, Search Volume and Competition': output = st.plotly_chart(fig6)
 #
 #     return output
-#
-def app():
+import uuid
+@st.cache(show_spinner=False)
+def custom_button(button_text):
 
-    state = _get_state()
+    button_uuid = str(uuid.uuid4()).replace('-', '')
+    button_id = re.sub('\d+', '', button_uuid)
+
+    custom_css = f"""
+        <style>
+            #{button_id} {{
+                width: 150px;
+                height: 50px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                background-color: #ff8401;
+                color: #fbfbfb;
+                padding: .25rem .75rem;
+                position: relative;
+                text-decoration: none;
+                border-radius: 6px;
+                border-width: 1px;
+                border-style: solid;
+                border-color: rgb(230, 234, 241);
+                border-image: initial;
+                box-shadow: 0 8px 18px 0 rgba(255, 132, 1, 0.26);
+                font-stretch: normal;
+                font-style: normal;
+                letter-spacing: normal;
+            }}
+            #{button_id}:hover {{
+                border-color: rgb(246, 51, 102);
+                color: rgb(246, 51, 102);
+            }}
+            #{button_id}:active {{
+                box-shadow: none;
+                background-color: rgb(246, 51, 102);
+                color: white;
+                }}
+        </style> """
+
+    btn = custom_css + f'<a id="{button_id}" >{button_text}</a><br></br>'
+
+    return btn
+
+def app():
 
     # <-- UI -->
     local_css("style.css")
@@ -319,67 +244,65 @@ def app():
     </p>
     """, unsafe_allow_html=True)
 
-    display_state_values(state)
     st.write("---")
 
     col1, col2, col3 = st.beta_columns(3)
     with col1:
         languages = ["EN", "IT", "ES", "DE"]
-        state.lang_option = st.selectbox("Select Language", languages, languages.index(state.lang_option) if state.lang_option else 0)
-        state.first_idea = st.text_input("What is the first idea?", state.first_idea or "")
+        lang_option = st.selectbox("Select Language", languages)
+        first_idea = st.text_input("What is the first idea?")
     with col2:
         countries = ["US", "UK", "IN", "ES", "IT", "DE"]
-        state.country_option = st.selectbox("Select Country", countries, countries.index(state.country_option) if state.country_option else 0)
-        state.second_idea = st.text_input("What is the second idea?", state.second_idea or "")
+        country_option = st.selectbox("Select Country", countries)
+        second_idea = st.text_input("What is the second idea?")
     with col3:
-        state.WL_key_ti = st.text_input("Enter your WordLift key", state.WL_key_ti or "")
-        state.third_idea = st.text_input("What is the third idea?", state.third_idea or "")
+        WL_key_ti = st.text_input("Enter your WordLift key")
+        third_idea = st.text_input("What is the third idea?")
     size = ['Small (25 Queries)', 'Medium (50 Queries)', 'Large (100 Queries)', 'X-Large (700 Queries)']
-    state.size_navigation = st.radio('Please specify preferred queries list size, then press Submit', size, size.index(state.size_navigation) if state.size_navigation else 0)
-    state.submit_button = st.button("Submit", state.submit_button)
+    size_navigation = st.radio('Please specify preferred queries list size, then press Submit', size)
 
-    if state.submit_button:
+    # submit_button = st.button("Submit")
+    submit_button = custom_button('Submit')
+    st.markdown(submit_button, unsafe_allow_html=True)
+
+    if submit_button:
+
         # <-- user input conditions -->
         # 1- WordLift Key
-        if state.WL_key_ti:
-            WL_key = state.WL_key_ti
-        elif not state.WL_key_ti:
+        if WL_key_ti:
+            WL_key = WL_key_ti
+        elif not WL_key_ti:
             st.error("Please provide your WordLift key to proceed.")
             st.stop()
         # 2- query list size
-        if state.size_navigation == 'Small (25 Queries)':
+        if size_navigation == 'Small (25 Queries)':
             list_size = 25 # when i tried the funds queries, 10 gave me error because treemap couldnnt it is small
-            pb_speed = 2.5
-        elif state.size_navigation == 'Medium (50 Queries)':
+
+        elif size_navigation == 'Medium (50 Queries)':
             list_size = 50
-            pb_speed = 5
-        elif state.size_navigation == 'Large (100 Queries)':
+
+        elif size_navigation == 'Large (100 Queries)':
             list_size = 100
-            pb_speed = 10
-        elif state.size_navigation == 'X-Large (700 Queries)':
+
+        elif size_navigation == 'X-Large (700 Queries)':
             list_size = 700
-            pb_speed = 70
+
         # 3- keywords list
-        if not (state.first_idea or state.second_idea or state.third_idea):
+        if not (first_idea or second_idea or third_idea):
             st.error("You have not typed any ideas! Please type at least two ideas, then press Submit")
             st.stop()
-        elif state.first_idea:
-            if state.second_idea:
-                if state.third_idea:
+        elif first_idea:
+            if second_idea:
+                if third_idea:
                     st.success("SUCCESS!")
-                    keyword_list = state.first_idea + ', ' + state.second_idea + ', ' + state.third_idea
-                elif not state.third_idea:
+                    keyword_list = first_idea + ', ' + second_idea + ', ' + third_idea
+                elif not third_idea:
                     st.success("SUCCESS!")
-                    keyword_list = state.first_idea + ', ' + state.second_idea
-            elif not (state.second_idea or state.third_idea):
+                    keyword_list = first_idea + ', ' + second_idea
+            elif not (second_idea or third_idea):
                 st.error("You have typed only one idea! Please type at least two ideas, then press Submit")
                 st.stop()
         keyword_list = keyword_list.strip('][').split(', ')
-
-        list_size = 5
-        pb_speed = 5
-
-        # step1()
 
         keywords = [generate_keywords(q) for q in keyword_list]
         keywords = [query for sublist in keywords for query in sublist]
@@ -415,13 +338,16 @@ def app():
 
         st.subheader("1- Queries List")
         st.markdown("Please wait while we prepare your queries list...")
-        progress_bar(list_size, pb_speed)
+        progress_bar(list_size)
         balloons("list of queries")
         st.dataframe(df4_merged)
         st.write("Total number of queries saved on (",file_name, ")is",len(df))
         st.markdown(csv_download_button, unsafe_allow_html=True)
 
-        # step2()
+        st.subheader("2- Treemap")
+        st.markdown("Please wait while we prepare your treemap...")
+        progress_bar(list_size)
+        balloons("treemap")
 
         s = df4_merged.apply(lambda x: pd.Series(x['types'],), axis=1).stack().reset_index(level=1, drop=True)
         s.name = 'types'
@@ -432,37 +358,43 @@ def app():
         df6 = df5.drop('entities', axis=1).join(p)
         df6['entities'] = pd.Series(df6['entities'], dtype=object)
 
-        fig1 = px.histogram(df6, x='entities').update_xaxes(categoryorder="total descending")
-        df6['all'] = 'all'
-        fig2 = px.treemap(df6, path=['all','types','entities','queries'], color='entities')
-        fig3 = px.treemap(df4_merged, path=['entities'], values='competition', color='competition', color_continuous_scale='Blues')
-        df6 = df6.dropna(subset=['search_volume', 'competition'])
-        fig4 = px.treemap(df6, path=['all','entities','queries'], values='search_volume', color='search_volume', color_continuous_scale='Blues')
-        fig5 = px.treemap(df6, path=['all','entities','queries'], values='competition', color='competition', color_continuous_scale='purpor')
-        fig6 = px.treemap(df6, path=['all','entities','queries'], values='search_volume', color='competition', color_continuous_scale='blues', color_continuous_midpoint=np.average(df6['competition'], weights=df6['search_volume']))
-
-        st.subheader("2- Treemap")
-        st.markdown("Please wait while we prepare your treemap...")
-        progress_bar(list_size, pb_speed)
-        balloons("treemap")
-
         # If i used session state or url get/set query parameters, i'll maintain the “button pushed” flag
         # which will allow us to persist the button pushed state across runs.
         chart_types = ['Top Entities', 'Intent by Type and Entity', 'Intent by Entity and Search Volume', 'Intent by Search Volume and Competition', 'Intent by Entity and Competition', 'Intent by Entity, Search Volume and Competition']
-        state.chart_navigation = st.selectbox('Please choose preferred chart type:', chart_types, chart_types.index(state.chart_navigation) if state.chart_navigation else 2)
+        chart_navigation = st.selectbox('Please choose preferred chart type:', chart_types, index = 2)
 
-        if state.chart_navigation == 'Top Entities': st.plotly_chart(fig1)
-        elif state.chart_navigation == 'Intent by Type and Entity': st.plotly_chart(fig2)
-        elif state.chart_navigation == 'Intent by Entity and Search Volume': st.plotly_chart(fig3)
-        elif state.chart_navigation == 'Intent by Search Volume and Competition': st.plotly_chart(fig4)
-        elif state.chart_navigation == 'Intent by Entity and Competition': st.plotly_chart(fig5)
-        elif state.chart_navigation == 'Intent by Entity, Search Volume and Competition': st.plotly_chart(fig6)
+        if chart_navigation == 'Top Entities':
+            fig1 = px.histogram(df6, x='entities').update_xaxes(categoryorder="total descending")
+            st.plotly_chart(fig1)
 
-    state.sync()
+        elif chart_navigation == 'Intent by Type and Entity':
+            df6['all'] = 'all'
+            fig2 = px.treemap(df6, path=['all','types','entities','queries'], color='entities')
+            st.plotly_chart(fig2)
+
+        elif chart_navigation == 'Intent by Entity and Search Volume':
+            df6['all'] = 'all'
+            fig3 = px.treemap(df4_merged, path=['entities'], values='competition', color='competition', color_continuous_scale='Blues')
+            st.plotly_chart(fig3)
+
+        elif chart_navigation == 'Intent by Search Volume and Competition':
+            df6['all'] = 'all'
+            df6 = df6.dropna(subset=['search_volume', 'competition'])
+            fig4 = px.treemap(df6, path=['all','entities','queries'], values='search_volume', color='search_volume', color_continuous_scale='Blues')
+            st.plotly_chart(fig4)
+
+        elif chart_navigation == 'Intent by Entity and Competition':
+            df6['all'] = 'all'
+            fig5 = px.treemap(df6, path=['all','entities','queries'], values='competition', color='competition', color_continuous_scale='purpor')
+            st.plotly_chart(fig5)
+
+        elif chart_navigation == 'Intent by Entity, Search Volume and Competition':
+            df6['all'] = 'all'
+            fig6 = px.treemap(df6, path=['all','entities','queries'], values='search_volume', color='competition', color_continuous_scale='blues', color_continuous_midpoint=np.average(df6['competition'], weights=df6['search_volume']))
+            st.plotly_chart(fig6)
 
     # <-- app functionality -->
     # f1,f2 = st.beta_columns(2)
-
 
     # 1- queries list
     # with f1:

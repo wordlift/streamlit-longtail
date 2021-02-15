@@ -28,10 +28,10 @@ def set_png_as_page_bg(png_file):
     st.markdown(page_bg_img, unsafe_allow_html=True)
     return
 
-def progress_bar(range_size, sleep_size):
+def progress_bar(range_size):
 
     for _ in stqdm(range(range_size), desc="This is a slow task, please be patient"):
-        sleep(sleep_size)
+        sleep(0.1)
     return
 
 def balloons(result):
