@@ -174,27 +174,32 @@ def main():
             return keyword_suggestions
 
         # i think i sould replace every st.write in loading with st.info and then after execution i get rid of it
-        st.write("Expanding the initial ideas using Google's autocomplete...")
+        st.write("Expanding initial ideas using Google's autocomplete...")
         state.keywords = [generate_keywords(q) for q in state.keyword_list]
         state.keywords = [query for sublist in state.keywords for query in sublist] # to flatten
         state.keywords = list(set(state.keywords)) # to de-duplicate
         st.write("---")
 
-        st.write("Bringing all the queries that we have generated in a first dataframe...")
+        st.header(":rocket: Queries List")
+        st.markdown("Please wait while we prepare your queries list...")
+
+        st.info("Analyzing the queries we have generated...")
         state.df = pd.DataFrame(state.keywords, columns =['queries'])
         state.df = state.df.head(state.list_size)
         state.df['entities'] = ''
         state.df['types'] = ''
-        state.one = st.dataframe(state.df['queries'])
-        st.write("---")
+        # state.one = st.dataframe(state.df['queries'])
+        # st.write("---")
 
         # Display the selected page with the session state
         pages[page](state)
 
+        entity_data = []
+        type_data = []
+
         @st.cache(show_spinner = False)
         def wl_nlp(text, language, key):
-            entity_data = []
-            type_data = []
+
             API_URL = "https://api.wordlift.io/analysis/single"
             # preparing the data for the analysis
             data_in = {
@@ -213,6 +218,8 @@ def main():
             if response.ok: # make sure connection is fine
                 json_response = json.loads(response.text) # read the json response
                 json_response = json_response.get('entities') # select "entities"
+                entity_data = []
+                type_data = []
 
                 for key in json_response:
                     entity_data.append(json_response[key]['label']) # creating the list for labels
@@ -227,23 +234,24 @@ def main():
             type_data = entities[1]
             return entity_data, type_data
 
-        st.write("Extracting entities from queries ...")
+        st.info("Extracting entities from queries...")
         @st.cache(show_spinner = False)
         def extract():
+            # Iterating through queries
             for index, row in state.df.iterrows():
-                data_x = string_to_entities(state.df['queries'][index], language, country)
-                if len(data_x[0]) is not 0:
-                    state.df.at[index,'entities'] = data_x[0]
-                    state.df.at[index,'types'] = data_x[1]
+                data_x = string_to_entities(state.df['queries'][index]) # extracting entities
+                if len(data_x[0]) is not 0: # make sure there are entities
+                  state.df.at[index,'entities'] = data_x[0]
+                  state.df.at[index,'types'] = data_x[1]
                 else:
-                    state.df.at[index,'entities'] = 'n.a.'
-                    state.df.at[index,'types'] = 'uncategorized'
+                  state.df.at[index,'entities'] = 'n.a.'
+                  state.df.at[index,'types'] = 'uncategorized'
 
         extract()
 
-        st.write('we have found:', len(state.df), 'intents to cover')
-        state.two = st.dataframe(state.df)
-        st.write('---')
+        # st.write('we have found:', len(state.df), 'intents to cover')
+        # state.two = st.dataframe(state.df)
+        # st.write('---')
 
         from http.client import HTTPSConnection
         from json import loads
@@ -275,7 +283,7 @@ def main():
                     data_str = dumps(data)
                 return self.request(path, 'POST', data_str)
 
-        st.write("Adding keyword data ...")
+        st.info("Adding keyword data...")
         state.client = RestClient()
         state.post_data = dict()
 
@@ -298,31 +306,41 @@ def main():
 
         state.keyword_df.rename(columns={'keyword': 'queries'}, inplace=True)
 
-        st.text("Here is the list of queries augmented with keyword data (cpc, search volume and competition)")
-        state.three = st.dataframe(state.keyword_df)
-        st.write("---")
+        # st.text("Here is the list of queries augmented with keyword data (cpc, search volume and competition)")
+        # state.three = st.dataframe(state.keyword_df)
+        # st.write("---")
 
-        st.write("Merging queries with keyword data ...")
+        st.info("Merging queries with keyword data...")
         state.df4_merged = state.df.merge(state.keyword_df, how='right', on='queries')
 
-        st.subheader("1- Queries List")
-        st.markdown("Please wait while we prepare your queries list...")
-        state.pb1 = progress_bar(state.list_size)
-        state.b1 = balloons("list of queries")
-        state.four = st.dataframe(state.df4_merged)
-        st.write("---")
-
-        st.write("Preparing your CSV file ...")
+        st.info("Preparing your CSV file...")
         state.cleanQuery = re.sub('\W+','', state.keyword_list[0])
         state.file_name = state.cleanQuery + ".csv"
         state.df4_merged.to_csv(state.file_name, encoding='utf-8', index=True)
         state.csv_download_button = download_button(state.df4_merged, state.file_name, 'Download List')
 
+        # شكللي حاررجع البروقرس بار القديم الي من دون تقدم
+        state.pb1 = progress_bar(state.list_size)
+        state.b1 = balloons("list of queries")
+        state.four = st.dataframe(state.df4_merged)
+        # st.write("---")
         st.write("Total number of queries saved on (", state.file_name, ")is",len(state.df))
         st.markdown(state.csv_download_button, unsafe_allow_html=True)
         st.write("---")
 
-        st.write("Preparing data for visualization ...")
+
+
+
+
+        # ---------------------------------------------------------------------------------------------------------------
+
+
+
+
+        st.header(":rocket: Treemap")
+        st.markdown("Please wait while we prepare your treemaps...")
+
+        st.info("Preparing data for visualization...")
         from pandas import Series
 
         state.s = state.df4_merged.apply(lambda x: pd.Series(x['types'],), axis=1).stack().reset_index(level=1, drop=True)
@@ -337,41 +355,42 @@ def main():
         state.df6['entities'] = pd.Series(state.df6['entities'], dtype=object)
 
         state.five = st.dataframe(state.df6)
-        st.write("---")
 
-        st.write("Visualizing ...")
-        st.subheader("2- Treemap")
-        st.markdown("Please wait while we prepare your treemap...")
-        state.pb2 = progress_bar(state.list_size)
-        state.b2 = balloons("treemap")
-
-        chart_types = ['Top Entities',
-                        'Intent by Type and Entity',
-                        'Intent by Entity and Search Volume',
-                        'Intent by Search Volume and Competition',
-                        'Intent by Entity and Competition',
-                        'Intent by Entity',
-                        'Search Volume and Competition']
-        state.chart_navigation = st.selectbox('Please choose preferred chart type:', chart_types, index = 2)
-
+        st.info("Visualizing ...")
 
         import plotly.express as px
         import numpy as np
 
-        # 1
         state.fig = px.histogram(state.df6, x='entities').update_xaxes(categoryorder="total descending")
-        if state.chart_navigation == 'Top Entities':
+
+        state.pb2 = progress_bar(state.list_size)
+        state.b2 = balloons("treemap")
+
+        # make it a checkbox
+        t1, t2, t3, t4, t5, t6 = st.beta_columns(6)
+        with t1: state.treemap1 = st.checkbox("Show Top Entities", True)
+        with t2: state.treemap2 = st.checkbox("Show Intents by Type and Entity")
+        with t3: state.treemap3 = st.checkbox("Show Intents by Entity and Search Volume")
+        with t4: state.treemap4 = st.checkbox("Show Intents by Search Volume and Competition")
+        with t5: state.treemap5 = st.checkbox("Show Intents by Entity and Competition")
+        with t6: state.treemap6 = st.checkbox("Show Intents by Entity, Search Volume and Competition")
+
+        # 1
+        if state.treemap1:
+            st.subheader("Top Entities")
             state.first = st.plotly_chart(state.fig, use_container_width=True)
 
         # 2
         state.df6['all'] = 'all' # in order to have a single root node
         state.fig = px.treemap(state.df6, path=['all','types','entities','queries'], color='entities')
-        if state.chart_navigation == 'Intent by Type and Entity':
+        if state.treemap2:
+            st.subheader("Intents by Type and Entity")
             state.second = st.plotly_chart(state.fig, use_container_width=True)
 
         # 3
-        state.fig = px.treemap(state.df4_merged, path=['entities'], values='competition', color='competition', color_continuous_scale='Blues')
-        if state.chart_navigation == 'Intent by Entity and Search Volume':
+        state.fig = px.treemap(state.df6, path=['entities'], values='competition', color='competition', color_continuous_scale='Blues')
+        if state.treemap3:
+            st.subheader("Intents by Entity and Search Volume")
             state.third = st.plotly_chart(state.fig, use_container_width=True)
 
         # 4
@@ -379,14 +398,16 @@ def main():
         state.fig = px.treemap(state.df6, path=['all','entities','queries'], values='search_volume',
                                 color='search_volume',
                                 color_continuous_scale='Blues')
-        if state.chart_navigation == 'Intent by Search Volume and Competition':
+        if state.treemap4:
+            st.subheader("Intents by Search Volume and Competition")
             state.fourth = st.plotly_chart(state.fig, use_container_width=True)
 
         # 5
         state.fig = px.treemap(state.df6, path=['all','entities','queries'], values='competition',
                                 color='competition',
                                 color_continuous_scale='purpor')
-        if state.chart_navigation == 'Intent by Entity and Competition':
+        if state.treemap5:
+            st.subheader("Show Intents by Entity and Competition")
             state.fifth = st.plotly_chart(state.fig, use_container_width=True)
 
         # 6
@@ -394,18 +415,38 @@ def main():
                                 color='competition',
                                 color_continuous_scale='blues',
                                 color_continuous_midpoint=np.average(state.df6['competition'], weights=state.df6['search_volume']))
-        if state.chart_navigation == 'Intent by Entity, Search Volume and Competition':
+        if state.treemap6:
+            st.subheader("Intents by Entity, Search Volume and Competition")
             state.sixth = st.plotly_chart(state.fig, use_container_width=True)
 
         st.write("---")
+        st.header("Thank you!")
+        st.image("img/logo-wordlift.png", width=400)
+
+
+        # chart_types = ['Top Entities',
+        #                 'Intent by Type and Entity',
+        #                 'Intent by Entity and Search Volume',
+        #                 'Intent by Search Volume and Competition',
+        #                 'Intent by Entity and Competition',
+        #                 'Intent by Entity, Search Volume and Competition']
+        # state.chart_navigation = st.selectbox('Please choose preferred chart type:', chart_types, index = 2)
+        # if state.chart_navigation == 'Top Entities':
+        # if state.chart_navigation == 'Intent by Type and Entity':
+        # if state.chart_navigation == 'Intent by Entity and Search Volume':
+        # if state.chart_navigation == 'Intent by Search Volume and Competition':
+        # if state.chart_navigation == 'Intent by Entity and Competition':
+        # if state.chart_navigation == 'Intent by Entity, Search Volume and Competition':
 
 def page_WordLift(state):
-    st.text("WordLift page")
-    st.write("---")
+    # st.text("WordLift page")
+    # st.write("---")
+
+    import requests, json
 
 def page_SpaCy(state):
-    st.text("SpaCy page")
-    st.write("---")
+    # st.text("SpaCy page")
+    # st.write("---")
 
     # Getting additional hourse power - adding more libraries
     import spacy
