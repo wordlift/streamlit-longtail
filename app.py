@@ -53,7 +53,6 @@ def main():
     st.sidebar.info("You will need a WordLift key. You can [get one for free](https://wordlift.io/checkout/) for 14 days.")
     st.sidebar.image("img/emo-merge.png", use_column_width=True)
 
-
     # Display the selected page with the session state
     pages[page](state)
 
@@ -70,28 +69,20 @@ def main():
         every search opportunity to help you create super-useful content.”
     </p>
     """, unsafe_allow_html=True)
-
     st.write("---")
 
+    languages = ["en", "it", "es", "de"]
+    countries = ["us", "uk", "in", "es", "it", "de"]
     col1, col2, col3 = st.beta_columns(3)
-    with col1:
-        languages = ["en", "it", "es", "de"]
-        state.lang_option = st.selectbox("Select Language", languages)
-    with col2:
-        countries = ["us", "uk", "in", "es", "it", "de"]
-        state.country_option = st.selectbox("Select Country", countries)
-    with col3:
-        state.WL_key_ti = st.text_input("Enter your WordLift key")
-
     col4, col5, col6 = st.beta_columns(3)
-    with col4:
-        state.first_idea = st.text_input("What is the first idea?")
-    with col5:
-        state.second_idea = st.text_input("What is the second idea?")
-    with col6:
-        state.third_idea = st.text_input("What is the third idea?")
-
+    with col1: state.lang_option = st.selectbox("Select Language", languages)
+    with col2: state.country_option = st.selectbox("Select Country", countries)
+    with col3: state.WL_key_ti = st.text_input("Enter your WordLift key")
+    with col4: state.first_idea = st.text_input("What is the first idea?")
+    with col5: state.second_idea = st.text_input("What is the second idea?")
+    with col6: state.third_idea = st.text_input("What is the third idea?")
     st.write("---")
+
     size = ['Small (25 Queries)', 'Medium (50 Queries)', 'Large (100 Queries)', 'X-Large (700 Queries)']
     state.size_navigation = st.radio('Please specify preferred queries list size, then press Submit', size)
 
@@ -172,7 +163,7 @@ def main():
             seed = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
                     'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
                     '1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
-            st.write('Grabbing suggestions for (' + str(query) + ') ...')
+            st.write('Grabbing suggestions for (' + str(query) + ')...')
             first_pass = autocomplete(query)
             second_pass = [autocomplete(x) for x in first_pass]
             flat_second_pass = []
@@ -186,7 +177,7 @@ def main():
             st.write('SUCCESS!')
             return keyword_suggestions
 
-        st.write("Expanding initial ideas using Google's autocomplete...")
+        st.info("Expanding initial ideas using Google's autocomplete...")
         state.keywords = [generate_keywords(q) for q in state.keyword_list]
         state.keywords = [query for sublist in state.keywords for query in sublist] # to flatten
         state.keywords = list(set(state.keywords)) # to de-duplicate
@@ -254,8 +245,7 @@ def main():
             type_data = [x.label_ for x in entities.ents]
             return entity_data, type_data
 
-        # if spacy/ w, two extracts or inside the extract a condition
-
+        # if spacy/ wl, two extracts or inside the extract a condition
         st.info("Extracting entities from queries...")
         @st.cache(show_spinner = False)
         def extract():
@@ -334,8 +324,8 @@ def main():
         state.csv_download_button = download_button(state.df4_merged, state.file_name, 'Download List')
 
         # شكللي حاررجع البروقرس بار القديم الي من دون تقدم
-        state.pb1 = progress_bar(state.list_size)
-        state.b1 = balloons("list of queries")
+        # state.pb1 = progress_bar(state.list_size)
+        # state.b1 = balloons("list of queries")
         state.four = st.dataframe(state.df4_merged)
         # st.write("---")
         st.write("Total number of queries saved on (", state.file_name, ")is",len(state.df))
@@ -370,17 +360,40 @@ def main():
         state.df6 = state.df5.drop('entities', axis=1).join(state.p)
         state.df6['entities'] = pd.Series(state.df6['entities'], dtype=object)
 
-        state.five = st.dataframe(state.df6)
-
-        st.info("Visualizing ...")
+        st.info("Visualizing...")
 
         import plotly.express as px
         import numpy as np
 
-        state.fig = px.histogram(state.df6, x='entities').update_xaxes(categoryorder="total descending")
+        # 1
+        state.fig1 = px.histogram(state.df6, x='entities').update_xaxes(categoryorder="total descending")
 
-        state.pb2 = progress_bar(state.list_size)
-        state.b2 = balloons("treemap")
+        # 2
+        state.df6['all'] = 'all' # in order to have a single root node
+        state.fig2 = px.treemap(state.df6, path=['all','types','entities','queries'], color='entities')
+
+        # 3
+        state.fig3 = px.treemap(state.df6, path=['entities'], values='competition', color='competition', color_continuous_scale='Blues')
+
+        # 4
+        state.df6 = state.df6.dropna(subset=['search_volume', 'competition']) # remove rows when there are missing values
+        state.fig4 = px.treemap(state.df6, path=['all','entities','queries'], values='search_volume',
+                                color='search_volume',
+                                color_continuous_scale='Blues')
+
+        # 5
+        state.fig5 = px.treemap(state.df6, path=['all','entities','queries'], values='competition',
+                                color='competition',
+                                color_continuous_scale='purpor')
+
+        # 6
+        state.fig6 = px.treemap(state.df6, path=['all','entities','queries'], values='search_volume',
+                                color='competition',
+                                color_continuous_scale='blues',
+                                color_continuous_midpoint=np.average(state.df6['competition'], weights=state.df6['search_volume']))
+
+        # state.pb2 = progress_bar(state.list_size)
+        # state.b2 = balloons("treemap")
 
         # make it a checkbox
         t1, t2, t3, t4, t5, t6 = st.beta_columns(6)
@@ -394,46 +407,32 @@ def main():
         # 1
         if state.treemap1:
             st.subheader("Top Entities")
-            state.first = st.plotly_chart(state.fig, use_container_width=True)
+            state.first = st.plotly_chart(state.fig1, use_container_width=True)
 
         # 2
-        state.df6['all'] = 'all' # in order to have a single root node
-        state.fig = px.treemap(state.df6, path=['all','types','entities','queries'], color='entities')
         if state.treemap2:
             st.subheader("Intents by Type and Entity")
-            state.second = st.plotly_chart(state.fig, use_container_width=True)
+            state.second = st.plotly_chart(state.fig2, use_container_width=True)
 
         # 3
-        state.fig = px.treemap(state.df6, path=['entities'], values='competition', color='competition', color_continuous_scale='Blues')
         if state.treemap3:
             st.subheader("Intents by Entity and Search Volume")
-            state.third = st.plotly_chart(state.fig, use_container_width=True)
+            state.third = st.plotly_chart(state.fig3, use_container_width=True)
 
         # 4
-        state.df6 = state.df6.dropna(subset=['search_volume', 'competition']) # remove rows when there are missing values
-        state.fig = px.treemap(state.df6, path=['all','entities','queries'], values='search_volume',
-                                color='search_volume',
-                                color_continuous_scale='Blues')
         if state.treemap4:
             st.subheader("Intents by Search Volume and Competition")
-            state.fourth = st.plotly_chart(state.fig, use_container_width=True)
+            state.fourth = st.plotly_chart(state.fig4, use_container_width=True)
 
         # 5
-        state.fig = px.treemap(state.df6, path=['all','entities','queries'], values='competition',
-                                color='competition',
-                                color_continuous_scale='purpor')
         if state.treemap5:
-            st.subheader("Show Intents by Entity and Competition")
-            state.fifth = st.plotly_chart(state.fig, use_container_width=True)
+            st.subheader("Intents by Entity and Competition")
+            state.fifth = st.plotly_chart(state.fig5, use_container_width=True)
 
         # 6
-        state.fig = px.treemap(state.df6, path=['all','entities','queries'], values='search_volume',
-                                color='competition',
-                                color_continuous_scale='blues',
-                                color_continuous_midpoint=np.average(state.df6['competition'], weights=state.df6['search_volume']))
         if state.treemap6:
             st.subheader("Intents by Entity, Search Volume and Competition")
-            state.sixth = st.plotly_chart(state.fig, use_container_width=True)
+            state.sixth = st.plotly_chart(state.fig6, use_container_width=True)
 
         st.write("---")
         st.header("Thank you!")
