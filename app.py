@@ -49,9 +49,18 @@ def main():
     st.sidebar.image("img/logo-wordlift.png", width=200)
     st.sidebar.title("Navigation")
     page = st.sidebar.radio("Select your API", tuple(pages.keys()))
+    st.sidebar.write("---")
     st.sidebar.info("You will need a WordLift key. You can [get one for free](https://wordlift.io/checkout/) for 14 days.")
+    st.sidebar.image("img/emo-merge.png", use_column_width=True)
 
-    st.markdown('<p class="subject"> Content Idea Generator </p>', unsafe_allow_html=True)
+
+    # Display the selected page with the session state
+    pages[page](state)
+
+    m1,m2,m3 = st.beta_columns((0.2, 2, 2))
+    with m1: st.header(":fire:")
+    with m2: st.markdown('<p class="subject"> Content Idea Generator </p>', unsafe_allow_html=True)
+    with m3: st.header(":fire:")
     st.markdown('<p class="payoff"> Get instant, untapped content ideas </p>', unsafe_allow_html=True)
     st.markdown('<p class="question"> How does this work? </p>', unsafe_allow_html=True)
     st.markdown("""
@@ -61,6 +70,8 @@ def main():
         every search opportunity to help you create super-useful content.”
     </p>
     """, unsafe_allow_html=True)
+
+    st.write("---")
 
     col1, col2, col3 = st.beta_columns(3)
     with col1:
@@ -79,6 +90,8 @@ def main():
         state.second_idea = st.text_input("What is the second idea?")
     with col6:
         state.third_idea = st.text_input("What is the third idea?")
+
+    st.write("---")
     size = ['Small (25 Queries)', 'Medium (50 Queries)', 'Large (100 Queries)', 'X-Large (700 Queries)']
     state.size_navigation = st.radio('Please specify preferred queries list size, then press Submit', size)
 
@@ -173,7 +186,6 @@ def main():
             st.write('SUCCESS!')
             return keyword_suggestions
 
-        # i think i sould replace every st.write in loading with st.info and then after execution i get rid of it
         st.write("Expanding initial ideas using Google's autocomplete...")
         state.keywords = [generate_keywords(q) for q in state.keyword_list]
         state.keywords = [query for sublist in state.keywords for query in sublist] # to flatten
@@ -188,11 +200,6 @@ def main():
         state.df = state.df.head(state.list_size)
         state.df['entities'] = ''
         state.df['types'] = ''
-        # state.one = st.dataframe(state.df['queries'])
-        # st.write("---")
-
-        # Display the selected page with the session state
-        pages[page](state)
 
         entity_data = []
         type_data = []
@@ -209,7 +216,7 @@ def main():
                 "contentType": "text",
                 "exclude": [],
                 "scope": "local"} # change this to "global" for all entities or to "local" to use only entities from the local KG
-        	# adding headers and the key
+            # adding headers and the key
             headers_in = {
                     "Content-Type": "application/json;charset=UTF-8",
                     "Accept": "application/json;charset=UTF-8",
@@ -228,18 +235,33 @@ def main():
             return entity_data, type_data
 
         # Extracting entities and types using WordLift
-        def string_to_entities(text, language=language, key=WL_key):
+        def wl_string_to_entities(text, language=language, key=WL_key):
             entities = wl_nlp(text, language, key)
             entity_data = entities[0]
             type_data = entities[1]
             return entity_data, type_data
+
+        import spacy
+        from collections import Counter
+        import en_core_web_sm
+
+        nlp = en_core_web_sm.load()
+
+        # Extracting entities and types using SpaCy
+        def string_to_entities(text):
+            entities = nlp(text)
+            entity_data = [x.text for x in entities.ents]
+            type_data = [x.label_ for x in entities.ents]
+            return entity_data, type_data
+
+        # if spacy/ w, two extracts or inside the extract a condition
 
         st.info("Extracting entities from queries...")
         @st.cache(show_spinner = False)
         def extract():
             # Iterating through queries
             for index, row in state.df.iterrows():
-                data_x = string_to_entities(state.df['queries'][index]) # extracting entities
+                data_x = wl_string_to_entities(state.df['queries'][index]) # extracting entities
                 if len(data_x[0]) is not 0: # make sure there are entities
                   state.df.at[index,'entities'] = data_x[0]
                   state.df.at[index,'types'] = data_x[1]
@@ -248,10 +270,6 @@ def main():
                   state.df.at[index,'types'] = 'uncategorized'
 
         extract()
-
-        # st.write('we have found:', len(state.df), 'intents to cover')
-        # state.two = st.dataframe(state.df)
-        # st.write('---')
 
         from http.client import HTTPSConnection
         from json import loads
@@ -306,10 +324,6 @@ def main():
 
         state.keyword_df.rename(columns={'keyword': 'queries'}, inplace=True)
 
-        # st.text("Here is the list of queries augmented with keyword data (cpc, search volume and competition)")
-        # state.three = st.dataframe(state.keyword_df)
-        # st.write("---")
-
         st.info("Merging queries with keyword data...")
         state.df4_merged = state.df.merge(state.keyword_df, how='right', on='queries')
 
@@ -332,7 +346,9 @@ def main():
 
 
 
-        # ---------------------------------------------------------------------------------------------------------------
+        # -------------------------------------------------------------------------------------------------------------------------------------------------------
+        # -------------------------------------------------------------------------------------------------------------------------------------------------------
+
 
 
 
@@ -421,45 +437,15 @@ def main():
 
         st.write("---")
         st.header("Thank you!")
-        st.image("img/logo-wordlift.png", width=400)
-
-
-        # chart_types = ['Top Entities',
-        #                 'Intent by Type and Entity',
-        #                 'Intent by Entity and Search Volume',
-        #                 'Intent by Search Volume and Competition',
-        #                 'Intent by Entity and Competition',
-        #                 'Intent by Entity, Search Volume and Competition']
-        # state.chart_navigation = st.selectbox('Please choose preferred chart type:', chart_types, index = 2)
-        # if state.chart_navigation == 'Top Entities':
-        # if state.chart_navigation == 'Intent by Type and Entity':
-        # if state.chart_navigation == 'Intent by Entity and Search Volume':
-        # if state.chart_navigation == 'Intent by Search Volume and Competition':
-        # if state.chart_navigation == 'Intent by Entity and Competition':
-        # if state.chart_navigation == 'Intent by Entity, Search Volume and Competition':
+        st.image("img/wl-ai.png", use_column_width=True)
 
 def page_WordLift(state):
-    # st.text("WordLift page")
-    # st.write("---")
-
-    import requests, json
+    st.image("img/img1.png", use_column_width=True)
+    st.write("---")
 
 def page_SpaCy(state):
-    # st.text("SpaCy page")
-    # st.write("---")
-
-    # Getting additional hourse power - adding more libraries
-    import spacy
-    from collections import Counter
-    import en_core_web_sm
-    nlp = en_core_web_sm.load()
-
-    # Extracting entities and types using SpaCy
-    def string_to_entities(text):
-        entities = nlp(text)
-        entity_data = [x.text for x in entities.ents]
-        type_data = [x.label_ for x in entities.ents]
-        return entity_data, type_data
+    st.image("img/img2.png", use_column_width=True)
+    st.write("---")
 
 if __name__ == "__main__":
     main()
