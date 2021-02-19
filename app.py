@@ -324,8 +324,8 @@ def main():
         state.csv_download_button = download_button(state.df4_merged, state.file_name, 'Download List')
 
         # شكللي حاررجع البروقرس بار القديم الي من دون تقدم
-        # state.pb1 = progress_bar(state.list_size)
-        # state.b1 = balloons("list of queries")
+        state.pb1 = progress_bar(state.list_size)
+        state.b1 = balloons("list of queries")
         state.four = st.dataframe(state.df4_merged)
         # st.write("---")
         st.write("Total number of queries saved on (", state.file_name, ")is",len(state.df))
@@ -392,47 +392,47 @@ def main():
                                 color_continuous_scale='blues',
                                 color_continuous_midpoint=np.average(state.df6['competition'], weights=state.df6['search_volume']))
 
-        # state.pb2 = progress_bar(state.list_size)
-        # state.b2 = balloons("treemap")
+        state.pb2 = progress_bar(state.list_size)
+        state.b2 = balloons("treemap")
 
         # make it a checkbox
-        t1, t2, t3, t4, t5, t6 = st.beta_columns(6)
-        with t1: state.treemap1 = st.checkbox("Show Top Entities", True)
-        with t2: state.treemap2 = st.checkbox("Show Intents by Type and Entity")
-        with t3: state.treemap3 = st.checkbox("Show Intents by Entity and Search Volume")
-        with t4: state.treemap4 = st.checkbox("Show Intents by Search Volume and Competition")
-        with t5: state.treemap5 = st.checkbox("Show Intents by Entity and Competition")
-        with t6: state.treemap6 = st.checkbox("Show Intents by Entity, Search Volume and Competition")
+        # t1, t2, t3, t4, t5, t6 = st.beta_columns(6)
+        # with t1: state.treemap1 = st.checkbox("Show Top Entities", True)
+        # with t2: state.treemap2 = st.checkbox("Show Intents by Type and Entity")
+        # with t3: state.treemap3 = st.checkbox("Show Intents by Entity and Search Volume")
+        # with t4: state.treemap4 = st.checkbox("Show Intents by Search Volume and Competition")
+        # with t5: state.treemap5 = st.checkbox("Show Intents by Entity and Competition")
+        # with t6: state.treemap6 = st.checkbox("Show Intents by Entity, Search Volume and Competition")
 
         # 1
-        if state.treemap1:
-            st.subheader("Top Entities")
-            state.first = st.plotly_chart(state.fig1, use_container_width=True)
+        # if state.treemap1:
+        st.subheader("Top Entities")
+        state.first = st.plotly_chart(state.fig1, use_container_width=True)
 
         # 2
-        if state.treemap2:
-            st.subheader("Intents by Type and Entity")
-            state.second = st.plotly_chart(state.fig2, use_container_width=True)
+        # if state.treemap2:
+        st.subheader("Intents by Type and Entity")
+        state.second = st.plotly_chart(state.fig2, use_container_width=True)
 
         # 3
-        if state.treemap3:
-            st.subheader("Intents by Entity and Search Volume")
-            state.third = st.plotly_chart(state.fig3, use_container_width=True)
+        # if state.treemap3:
+        st.subheader("Intents by Entity and Search Volume")
+        state.third = st.plotly_chart(state.fig3, use_container_width=True)
 
         # 4
-        if state.treemap4:
-            st.subheader("Intents by Search Volume and Competition")
-            state.fourth = st.plotly_chart(state.fig4, use_container_width=True)
+        # if state.treemap4:
+        st.subheader("Intents by Search Volume and Competition")
+        state.fourth = st.plotly_chart(state.fig4, use_container_width=True)
 
         # 5
-        if state.treemap5:
-            st.subheader("Intents by Entity and Competition")
-            state.fifth = st.plotly_chart(state.fig5, use_container_width=True)
+        # if state.treemap5:
+        st.subheader("Intents by Entity and Competition")
+        state.fifth = st.plotly_chart(state.fig5, use_container_width=True)
 
         # 6
-        if state.treemap6:
-            st.subheader("Intents by Entity, Search Volume and Competition")
-            state.sixth = st.plotly_chart(state.fig6, use_container_width=True)
+        # if state.treemap6:
+        st.subheader("Intents by Entity, Search Volume and Competition")
+        state.sixth = st.plotly_chart(state.fig6, use_container_width=True)
 
         st.write("---")
         st.header("Thank you!")
