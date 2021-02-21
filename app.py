@@ -251,7 +251,14 @@ def main():
         def extract():
             # Iterating through queries
             for index, row in state.df.iterrows():
-                data_x = wl_string_to_entities(state.df['queries'][index]) # extracting entities
+
+
+                if pages = "WordLift":
+                    data_x = wl_string_to_entities(state.df['queries'][index]) # extracting entities
+                elif pages = "SpaCy":
+                    data_x = string_to_entities(state.df['queries'][index]) # extracting entities
+
+
                 if len(data_x[0]) is not 0: # make sure there are entities
                   state.df.at[index,'entities'] = data_x[0]
                   state.df.at[index,'types'] = data_x[1]
@@ -435,15 +442,15 @@ def main():
         state.sixth = st.plotly_chart(state.fig6, use_container_width=True)
 
         st.write("---")
-        st.header("Thank you!")
-        st.image("img/wl-ai.png", use_column_width=True)
+        # st.header("Thank you!")
+        # st.image("img/wl-ai.png", use_column_width=True)
 
 def page_WordLift(state):
-    st.image("img/img1.png", use_column_width=True)
+    # st.image("img/img1.png", use_column_width=True)
     st.write("---")
 
 def page_SpaCy(state):
-    st.image("img/img2.png", use_column_width=True)
+    # st.image("img/img2.png", use_column_width=True)
     st.write("---")
 
 if __name__ == "__main__":
