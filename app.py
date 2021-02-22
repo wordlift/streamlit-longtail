@@ -188,22 +188,22 @@ def main():
             info0.stop()
             innfo00.stop()
 
-        info1 = st.info("Expanding initial ideas using Google's autocomplete...")
+        info = st.markdown("Expanding initial ideas using Google's autocomplete...")
         state.keywords = [generate_keywords(q) for q in state.keyword_list]
         state.keywords = [query for sublist in state.keywords for query in sublist] # to flatten
         state.keywords = list(set(state.keywords)) # to de-duplicate
         st.write("---")
-        info1 = st.empty()
+        # info = st.empty()
 
         st.header(":rocket: Queries List")
         st.markdown("Please wait while we prepare your queries list...")
 
-        info2 = st.info("Analyzing the queries we have generated...")
+        info = st.markdown("Analyzing the queries we have generated...")
         state.df = pd.DataFrame(state.keywords, columns =['queries'])
         state.df = state.df.head(state.list_size)
         state.df['entities'] = ''
         state.df['types'] = ''
-        info2 = st.empty()
+        # info = st.empty()
 
         entity_data = []
         type_data = []
@@ -259,7 +259,7 @@ def main():
             return entity_data, type_data
 
         # if spacy/ wl, two extracts or inside the extract a condition
-        info3 = st.info("Extracting entities from queries...")
+        info = st.markdown("Extracting entities from queries...")
 
         # @st.cache(show_spinner = False)
         def extract():
@@ -279,7 +279,7 @@ def main():
                   state.df.at[index,'types'] = 'uncategorized'
 
         extract()
-        info3 = st.empty()
+        # info = st.empty()
 
         from http.client import HTTPSConnection
         from json import loads
@@ -311,7 +311,7 @@ def main():
                     data_str = dumps(data)
                 return self.request(path, 'POST', data_str)
 
-        info4 = st.info("Adding keyword data...")
+        info = st.markdown("Adding keyword data...")
         state.client = RestClient()
 
         if language == 'en': language_name1="English"
@@ -375,18 +375,18 @@ def main():
         state.keyword_df = json_normalize(data=state.response['tasks'][0]['result'])
 
         state.keyword_df.rename(columns={'keyword': 'queries'}, inplace=True)
-        info4 = st.empty()
+        # info = st.empty()
 
-        info5 = st.info("Merging queries with keyword data...")
+        info = st.markdown("Merging queries with keyword data...")
         state.df4_merged = state.df.merge(state.keyword_df, how='right', on='queries')
-        info5 = st.empty()
+        # info = st.empty()
 
-        info6 = st.info("Preparing your CSV file...")
+        info = st.markdown("Preparing your CSV file...")
         state.cleanQuery = re.sub('\W+','', state.keyword_list[0])
         state.file_name = state.cleanQuery + ".csv"
         state.df4_merged.to_csv(state.file_name, encoding='utf-8', index=True)
         state.csv_download_button = download_button(state.df4_merged, state.file_name, 'Download List')
-        info6 = st.empty()
+        # info = st.empty()
 
         # شكللي حاررجع البروقرس بار القديم الي من دون تقدم
         state.pb1 = progress_bar(state.list_size)
@@ -414,7 +414,7 @@ def main():
         st.header(":rocket: Treemap")
         st.markdown("Please wait while we prepare your treemaps...")
 
-        info7 = st.info("Preparing data for visualization...")
+        info = st.markdown("Preparing data for visualization...")
         from pandas import Series
 
         state.s = state.df4_merged.apply(lambda x: pd.Series(x['types'],), axis=1).stack().reset_index(level=1, drop=True)
@@ -427,9 +427,9 @@ def main():
 
         state.df6 = state.df5.drop('entities', axis=1).join(state.p)
         state.df6['entities'] = pd.Series(state.df6['entities'], dtype=object)
-        info7 = st.empty()
+        # info = st.empty()
 
-        info8 = st.info("Visualizing...")
+        info = st.markdown("Visualizing...")
 
         import plotly.express as px
         import numpy as np
@@ -461,7 +461,7 @@ def main():
                                 color_continuous_scale='blues',
                                 color_continuous_midpoint=np.average(state.df6['competition'], weights=state.df6['search_volume']))
 
-        info8 = st.empty()
+        # info = st.empty()
 
         state.pb2 = progress_bar(state.list_size)
         state.b2 = balloons("treemap")
