@@ -51,10 +51,8 @@ def main():
     page = st.sidebar.radio("Select your API", tuple(pages.keys()))
     st.sidebar.write("---")
     st.sidebar.info("You will need a WordLift key. You can [get one for free](https://wordlift.io/checkout/) for 14 days.")
-    st.sidebar.image("img/emo-merge.png", use_column_width=True)
-
-    # Display the selected page with the session state
-    pages[page](state)
+    st.sidebar.write("")
+    st.sidebar.image("img/emo-merge.png", width=200)#use_column_width=True)
 
     m1,m2,m3 = st.beta_columns((0.2, 2, 2))
     with m1: st.header(":fire:")
@@ -66,13 +64,36 @@ def main():
     <p class="answer">
         WordLift will “read” autocomplete data from Google, scan it using the
         Knowledge Graph from your website (or the SpaCy API) then quickly analyze
-        every search opportunity to help you create super-useful content.”
+        every search opportunity to help you create super-useful content.
     </p>
     """, unsafe_allow_html=True)
-    st.write("---")
 
-    languages = ["en", "it", "es", "de"]
-    countries = ["us", "uk", "in", "es", "it", "de"]
+    # Display the selected page with the session state
+    pages[page](state)
+
+    # | Languages       | Countries
+    # | en (english)    | us, uk, au, in, ca
+    # | it (italian)    | it
+    # | de (german)     | de
+    # | nl (dutch)      | nl (netherlands), bel (Belgium)
+    # | pt (portuguese) | pt, br
+    # | es (spanish)    | es
+    # | fr (french)     | fr
+
+    # so this should be the list and the order also for languages
+
+    # in terms of countries/territories we might have Brasile behind PT besides Portugal
+    # and UK, US, Australia, India, Canada behind English
+
+    # ممكن نستخدم فكرة المفاتيح هنا، عشان ما يطلع لليوزر اختصارات، تطلع له اسم الدولة وعندنا احنا اختصارات
+    languages = ["en", "it", "de", "nl", "pt", "es", "fr"]
+    countries = ["us", "uk", "au", "in", "ca", # countries that speak English
+                 "it", # countries that speak italian
+                 "de", # countries that speak German
+                 "nl", "bel", # countries that speak dutch
+                 "pt", "br", # countries that speak portuguese
+                 "es", # countries that speak spanish
+                 "fr"] # countries that speak french
     col1, col2, col3 = st.beta_columns(3)
     col4, col5, col6 = st.beta_columns(3)
     with col1: state.lang_option = st.selectbox("Select Language", languages)
@@ -102,14 +123,10 @@ def main():
             st.error("Please provide your WordLift key to proceed.")
             st.stop()
 
-        if state.size_navigation == 'Small (25 Queries)':
-            state.list_size = 25
-        elif state.size_navigation == 'Medium (50 Queries)':
-            state.list_size = 50
-        elif state.size_navigation == 'Large (100 Queries)':
-            state.list_size = 100
-        elif state.size_navigation == 'X-Large (700 Queries)':
-            state.list_size = 700
+        if state.size_navigation == 'Small (25 Queries)': state.list_size = 25
+        elif state.size_navigation == 'Medium (50 Queries)': state.list_size = 50
+        elif state.size_navigation == 'Large (100 Queries)': state.list_size = 100
+        elif state.size_navigation == 'X-Large (700 Queries)': state.list_size = 700
 
         if not (state.first_idea or state.second_idea or state.third_idea):
             st.error("You have not typed any ideas! Please type at least two ideas, then press Submit")
@@ -130,16 +147,6 @@ def main():
         @st.cache(show_spinner = False)
         def autocomplete(query):
 
-            '''
-            USING GOOGLE SEARCH AUTOCOMPLETE
-
-            tld = the country to use for the Google Search. It's a two-letter country code. (e.g., us for the United States).
-            Head to the Google countries for a full list of supported Google countries.
-
-            lan = the language to use for the Google Search. It's a two-letter lan guage code. (e.g., en for English).
-            Head to the Google languages for a full list of supported Google languages.
-
-            '''
             ua = UserAgent(verify_ssl=False)
             tld = country
             lan = language
@@ -157,13 +164,13 @@ def main():
 
         @st.cache(suppress_st_warning = True, show_spinner = False)
         def generate_keywords(query):
-            '''
-            Function to generate a large number of keyword suggestions
-            '''
+
             seed = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
                     'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
                     '1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
-            st.write('Grabbing suggestions for (' + str(query) + ')...')
+
+            info0 = st.write('Grabbing suggestions for (' + str(query) + ')...')
+
             first_pass = autocomplete(query)
             second_pass = [autocomplete(x) for x in first_pass]
             flat_second_pass = []
@@ -174,23 +181,29 @@ def main():
 
             keyword_suggestions = list(set(first_pass + flat_second_pass + flat_third_pass))
             keyword_suggestions.sort()
-            st.write('SUCCESS!')
-            return keyword_suggestions
 
-        st.info("Expanding initial ideas using Google's autocomplete...")
+            info00 = st.write('SUCCESS!')
+
+            return keyword_suggestions
+            info0.stop()
+            innfo00.stop()
+
+        info1 = st.info("Expanding initial ideas using Google's autocomplete...")
         state.keywords = [generate_keywords(q) for q in state.keyword_list]
         state.keywords = [query for sublist in state.keywords for query in sublist] # to flatten
         state.keywords = list(set(state.keywords)) # to de-duplicate
         st.write("---")
+        info1 = st.empty()
 
         st.header(":rocket: Queries List")
         st.markdown("Please wait while we prepare your queries list...")
 
-        st.info("Analyzing the queries we have generated...")
+        info2 = st.info("Analyzing the queries we have generated...")
         state.df = pd.DataFrame(state.keywords, columns =['queries'])
         state.df = state.df.head(state.list_size)
         state.df['entities'] = ''
         state.df['types'] = ''
+        info2 = st.empty()
 
         entity_data = []
         type_data = []
@@ -246,18 +259,17 @@ def main():
             return entity_data, type_data
 
         # if spacy/ wl, two extracts or inside the extract a condition
-        st.info("Extracting entities from queries...")
+        info3 = st.info("Extracting entities from queries...")
+
+        if pages[0]: # WordLift
+            data_x = wl_string_to_entities(state.df['queries'][index]) # extracting entities
+        elif pages[1]: # SpaCy
+            data_x = string_to_entities(state.df['queries'][index]) # extracting entities
+
         @st.cache(show_spinner = False)
         def extract():
             # Iterating through queries
             for index, row in state.df.iterrows():
-
-
-                if pages = "WordLift":
-                    data_x = wl_string_to_entities(state.df['queries'][index]) # extracting entities
-                elif pages = "SpaCy":
-                    data_x = string_to_entities(state.df['queries'][index]) # extracting entities
-
 
                 if len(data_x[0]) is not 0: # make sure there are entities
                   state.df.at[index,'entities'] = data_x[0]
@@ -267,6 +279,7 @@ def main():
                   state.df.at[index,'types'] = 'uncategorized'
 
         extract()
+        info3 = st.empty()
 
         from http.client import HTTPSConnection
         from json import loads
@@ -298,11 +311,20 @@ def main():
                     data_str = dumps(data)
                 return self.request(path, 'POST', data_str)
 
-        st.info("Adding keyword data...")
+        info4 = st.info("Adding keyword data...")
         state.client = RestClient()
         state.post_data = dict()
 
         state.post_data[len(state.post_data)] = dict(
+            # languages = ["en", "it", "de", "nl", "pt", "es", "fr"]
+            # countries = ["us", "uk", "au", "in", "ca", # countries that speak English
+            #              "it", # countries that speak italian
+            #              "de", # countries that speak German
+            #              "nl", "bel", # countries that speak dutch
+            #              "pt", "br", # countries that speak portuguese
+            #              "es", # countries that speak spanish
+            #              "fr"] # countries that speak french
+
             location_name="United States",
             language_name="English",
             keywords=state.df['queries'].tolist()
@@ -320,21 +342,24 @@ def main():
         state.keyword_df = json_normalize(data=state.response['tasks'][0]['result'])
 
         state.keyword_df.rename(columns={'keyword': 'queries'}, inplace=True)
+        info4 = st.empty()
 
-        st.info("Merging queries with keyword data...")
+        info5 = st.info("Merging queries with keyword data...")
         state.df4_merged = state.df.merge(state.keyword_df, how='right', on='queries')
+        info5 = st.empty()
 
-        st.info("Preparing your CSV file...")
+        info6 = st.info("Preparing your CSV file...")
         state.cleanQuery = re.sub('\W+','', state.keyword_list[0])
         state.file_name = state.cleanQuery + ".csv"
         state.df4_merged.to_csv(state.file_name, encoding='utf-8', index=True)
         state.csv_download_button = download_button(state.df4_merged, state.file_name, 'Download List')
+        info6 = st.empty()
 
         # شكللي حاررجع البروقرس بار القديم الي من دون تقدم
         state.pb1 = progress_bar(state.list_size)
         state.b1 = balloons("list of queries")
         state.four = st.dataframe(state.df4_merged)
-        # st.write("---")
+
         st.write("Total number of queries saved on (", state.file_name, ")is",len(state.df))
         st.markdown(state.csv_download_button, unsafe_allow_html=True)
         st.write("---")
@@ -345,6 +370,9 @@ def main():
 
         # -------------------------------------------------------------------------------------------------------------------------------------------------------
         # -------------------------------------------------------------------------------------------------------------------------------------------------------
+        # -------------------------------------------------------------------------------------------------------------------------------------------------------
+        # -------------------------------------------------------------------------------------------------------------------------------------------------------
+        # -------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
@@ -353,7 +381,7 @@ def main():
         st.header(":rocket: Treemap")
         st.markdown("Please wait while we prepare your treemaps...")
 
-        st.info("Preparing data for visualization...")
+        info7 = st.info("Preparing data for visualization...")
         from pandas import Series
 
         state.s = state.df4_merged.apply(lambda x: pd.Series(x['types'],), axis=1).stack().reset_index(level=1, drop=True)
@@ -366,8 +394,9 @@ def main():
 
         state.df6 = state.df5.drop('entities', axis=1).join(state.p)
         state.df6['entities'] = pd.Series(state.df6['entities'], dtype=object)
+        info7 = st.empty()
 
-        st.info("Visualizing...")
+        info8 = st.info("Visualizing...")
 
         import plotly.express as px
         import numpy as np
@@ -398,6 +427,8 @@ def main():
                                 color='competition',
                                 color_continuous_scale='blues',
                                 color_continuous_midpoint=np.average(state.df6['competition'], weights=state.df6['search_volume']))
+
+        info8 = st.empty()
 
         state.pb2 = progress_bar(state.list_size)
         state.b2 = balloons("treemap")
@@ -442,16 +473,12 @@ def main():
         state.sixth = st.plotly_chart(state.fig6, use_container_width=True)
 
         st.write("---")
-        # st.header("Thank you!")
-        # st.image("img/wl-ai.png", use_column_width=True)
 
 def page_WordLift(state):
-    # st.image("img/img1.png", use_column_width=True)
-    st.write("---")
+    st.write("")
 
 def page_SpaCy(state):
-    # st.image("img/img2.png", use_column_width=True)
-    st.write("---")
+    st.write("")
 
 if __name__ == "__main__":
     main()
