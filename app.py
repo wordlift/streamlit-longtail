@@ -314,27 +314,27 @@ def main():
         info4 = st.info("Adding keyword data...")
         state.client = RestClient()
 
-        if language == 'en': language_name="English"
-        elif language == 'it': language_name="Italian"
-        elif language == 'de': language_name="German"
-        elif language == 'nl': language_name="German"
-        elif language == 'pt': language_name="Portuguese"
-        elif language == 'es': language_name="Spanish"
-        elif language == 'fr': language_name="French"
+        if language == 'en': language_name1="English"
+        elif language == 'it': language_name1="Italian"
+        elif language == 'de': language_name1="German"
+        elif language == 'nl': language_name1="German"
+        elif language == 'pt': language_name1="Portuguese"
+        elif language == 'es': language_name1="Spanish"
+        elif language == 'fr': language_name1="French"
 
-        if country == 'us': location_name="United States"
-        elif country == 'uk': location_name="United Kingdom"
-        elif country == 'au': location_name="Australia"
-        elif country == 'in': location_name="India"
-        elif country == 'ca': location_name="Canada"
-        elif country == 'it': location_name="Italy"
-        elif country == 'de': location_name="Germany"
-        elif country == 'nl': location_name="Netherlands"
-        elif country == 'bel': location_name="Belgium"
-        elif country == 'pt': location_name="Portugal"
-        elif country == 'br': location_name="Brazil"
-        elif country == 'es': location_name="Spain"
-        elif country == 'fr': location_name="France"
+        if country == 'us': location_name1="United States"
+        elif country == 'uk': location_name1="United Kingdom"
+        elif country == 'au': location_name1="Australia"
+        elif country == 'in': location_name1="India"
+        elif country == 'ca': location_name1="Canada"
+        elif country == 'it': location_name1="Italy"
+        elif country == 'de': location_name1="Germany"
+        elif country == 'nl': location_name1="Netherlands"
+        elif country == 'bel': location_name1="Belgium"
+        elif country == 'pt': location_name1="Portugal"
+        elif country == 'br': location_name1="Brazil"
+        elif country == 'es': location_name1="Spain"
+        elif country == 'fr': location_name1="France"
 
         # | Languages       | Countries
         # | en (english)    | us, uk, au, in, ca
@@ -354,12 +354,12 @@ def main():
         #              "es", # countries that speak spanish
         #              "fr"] # countries that speak french
 
-        post_data = dict()
-        post_data[len(post_data)] = dict(
+        state.post_data = dict()
+        state.post_data[len(state.post_data)] = dict(
             # location_name="United States",
             # language_name="English",
-            location_name,
-            language_name,
+            location_name=location_name1,
+            language_name=language_name1,
             keywords=state.df['queries'].tolist()
         )
 
