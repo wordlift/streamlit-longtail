@@ -36,6 +36,8 @@ def progress_bar(range_size):
 
 def balloons(result):
     st.balloons()
-    st.text('Done! thanks for being patient.')
-    st.text("Here's your " + result)
+    m1 = st.markdown('Done! thanks for being patient.')
+    m2 = st.markdown("Here's your " + result)
+    m1.empty()
+    m2.empty()
     return

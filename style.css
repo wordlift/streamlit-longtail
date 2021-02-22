@@ -59,11 +59,11 @@ div.row-widget.stRadio > div[role="radiogroup"] > label[data-baseweb="radio"] > 
 }
 
 /* When the radio button is checked, add a blue background */
-div.row-widget.stRadio > div input:checked ~ .checkmark {
+/* div.row-widget.stRadio > div input:checked ~ .checkmark {
     flex-direction: row;
     align-items: stretch;
     background-color: #2196F3;
-}
+} */
 
 /* */
 .stProgress > div > div > div > div {
@@ -100,33 +100,33 @@ div[data-baseweb="select"] > div {
 /* */
 .subject {
     /* font-family: WordLiftFont; */
-    font-size: 50px;
+    font-size: 60px;
     font-weight: bold;
     font-stretch: normal;
     font-style: normal;
-    line-height: 1.18;
+    /* line-height: 1.18; */
     letter-spacing: normal;
-    /* text-align: center; */
+    text-align: center;
     color: rgba(0, 0, 0, 0.85);
 }
 
 /* */
 .payoff {
     /* font-family: WordLiftFont; */
-    font-size: 30px;
-    font-weight: normal;
+    font-size: 35px;
+    font-weight: bold;
     font-stretch: normal;
     font-style: normal;
     /* line-height: 2.76; */
     letter-spacing: normal;
-    /* text-align: center; */
+    text-align: center;
     color: #000000;
 }
 
 /* */
 .question {
     /* font-family: WordLiftFont; */
-    font-size: 20px;
+    font-size: 30px;
     font-weight: bold;
     font-stretch: normal;
     font-style: normal;
@@ -139,7 +139,7 @@ div[data-baseweb="select"] > div {
 /* */
 .answer {
     /* font-family: WordLiftFont; */
-    font-size: 15px;
+    font-size: 20px;
     font-weight: normal;
     font-stretch: normal;
     font-style: normal;
