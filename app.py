@@ -261,15 +261,15 @@ def main():
         # if spacy/ wl, two extracts or inside the extract a condition
         info3 = st.info("Extracting entities from queries...")
 
-        if pages[0]: # WordLift
-            data_x = wl_string_to_entities(state.df['queries'][index]) # extracting entities
-        elif pages[1]: # SpaCy
-            data_x = string_to_entities(state.df['queries'][index]) # extracting entities
-
-        @st.cache(show_spinner = False)
+        # @st.cache(show_spinner = False)
         def extract():
             # Iterating through queries
             for index, row in state.df.iterrows():
+
+                if pages["WordLift"]: # WordLift
+                    data_x = wl_string_to_entities(state.df['queries'][index]) # extracting entities
+                elif pages["SpaCy"]: # SpaCy
+                    data_x = string_to_entities(state.df['queries'][index]) # extracting entities
 
                 if len(data_x[0]) is not 0: # make sure there are entities
                   state.df.at[index,'entities'] = data_x[0]
@@ -313,20 +313,53 @@ def main():
 
         info4 = st.info("Adding keyword data...")
         state.client = RestClient()
-        state.post_data = dict()
 
-        state.post_data[len(state.post_data)] = dict(
-            # languages = ["en", "it", "de", "nl", "pt", "es", "fr"]
-            # countries = ["us", "uk", "au", "in", "ca", # countries that speak English
-            #              "it", # countries that speak italian
-            #              "de", # countries that speak German
-            #              "nl", "bel", # countries that speak dutch
-            #              "pt", "br", # countries that speak portuguese
-            #              "es", # countries that speak spanish
-            #              "fr"] # countries that speak french
+        if language == 'en': language_name="English"
+        elif language == 'it': language_name="Italian"
+        elif language == 'de': language_name="German"
+        elif language == 'nl': language_name="German"
+        elif language == 'pt': language_name="Portuguese"
+        elif language == 'es': language_name="Spanish"
+        elif language == 'fr': language_name="French"
 
-            location_name="United States",
-            language_name="English",
+        if country == 'us': location_name="United States"
+        elif country == 'uk': location_name="United Kingdom"
+        elif country == 'au': location_name="Australia"
+        elif country == 'in': location_name="India"
+        elif country == 'ca': location_name="Canada"
+        elif country == 'it': location_name="Italy"
+        elif country == 'de': location_name="Germany"
+        elif country == 'nl': location_name="Netherlands"
+        elif country == 'bel': location_name="Belgium"
+        elif country == 'pt': location_name="Portugal"
+        elif country == 'br': location_name="Brazil"
+        elif country == 'es': location_name="Spain"
+        elif country == 'fr': location_name="France"
+
+        # | Languages       | Countries
+        # | en (english)    | us, uk, au, in, ca
+        # | it (italian)    | it
+        # | de (german)     | de
+        # | nl (dutch)      | nl (netherlands), bel (Belgium)
+        # | pt (portuguese) | pt, br
+        # | es (spanish)    | es
+        # | fr (french)     | fr
+
+        # languages = ["en", "it", "de", "nl", "pt", "es", "fr"]
+        # countries = ["us", "uk", "au", "in", "ca", # countries that speak English
+        #              "it", # countries that speak italian
+        #              "de", # countries that speak German
+        #              "nl", "bel", # countries that speak dutch
+        #              "pt", "br", # countries that speak portuguese
+        #              "es", # countries that speak spanish
+        #              "fr"] # countries that speak french
+
+        post_data = dict()
+        post_data[len(post_data)] = dict(
+            # location_name="United States",
+            # language_name="English",
+            location_name,
+            language_name,
             keywords=state.df['queries'].tolist()
         )
 
