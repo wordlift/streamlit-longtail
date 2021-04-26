@@ -10,27 +10,16 @@ Created on Tue Jan 11 2021
 # Imports
 # ---------------------------------------------------------------------------- #
 import streamlit as st
-import pandas as pd
-
-import time
-import pprint
-import re
-import requests
-import json
 
 from fake_useragent import UserAgent
-from random import randint
 
-import spacy
-from collections import Counter
-import en_core_web_sm
-from http.client import HTTPSConnection
-from json import loads
-from json import dumps
-from pandas import json_normalize
-from pandas import Series
-import plotly.express as px
-import numpy as np
+import time
+from random import randint
+import pprint
+import pandas as pd
+import re
+import requests, json
+
 
 from Interface import *
 from download import *
@@ -105,12 +94,12 @@ countries = ["us", "uk", "au", "in", "ca", # countries that speak English
              "fr"] # countries that speak french
 col1, col2, col3 = st.beta_columns(3)
 col4, col5, col6 = st.beta_columns(3)
-with col1: state.lang_option = st.selectbox("Select Language", languages)
-with col2: state.country_option = st.selectbox("Select Country", countries)
-with col3: state.WL_key_ti = st.text_input("Enter your WordLift key")
-with col4: state.first_idea = st.text_input("What is the first idea?")
-with col5: state.second_idea = st.text_input("What is the second idea?")
-with col6: state.third_idea = st.text_input("What is the third idea?")
+with col1: lang_option = st.selectbox("Select Language", languages)
+with col2: country_option = st.selectbox("Select Country", countries)
+with col3: WL_key_ti = st.text_input("Enter your WordLift key")
+with col4: first_idea = st.text_input("What is the first idea?")
+with col5: second_idea = st.text_input("What is the second idea?")
+with col6: third_idea = st.text_input("What is the third idea?")
 st.write("---")
 
 size = ['Small (25 Queries)', 'Medium (50 Queries)', 'Large (100 Queries)', 'X-Large (700 Queries)']
@@ -160,11 +149,23 @@ def main():
         @st.cache(show_spinner = False)
         def autocomplete(query):
 
+            '''
+            USING GOOGLE SEARCH AUTOCOMPLETE
+
+            tld = the country to use for the Google Search. It's a two-letter country code. (e.g., us for the United States).
+            Head to the Google countries for a full list of supported Google countries.
+
+            lan = the language to use for the Google Search. It's a two-letter lan guage code. (e.g., en for English).
+            Head to the Google languages for a full list of supported Google languages.
+
+            '''
             ua = UserAgent(verify_ssl=False)
             tld = country
             lan = language
 
             time.sleep(randint(0, 2))
+
+            import requests, json
 
             URL = 'http://suggestqueries.google.com/complete/search?client=firefox&gl={0}&q={1}&hl={2}'.format(tld,query,lan)
 
@@ -263,6 +264,9 @@ def main():
             type_data = entities[1]
             return entity_data, type_data
 
+        import spacy
+        from collections import Counter
+        import en_core_web_sm
         nlp = en_core_web_sm.load()
 
         # Extracting entities and types using SpaCy
@@ -291,6 +295,10 @@ def main():
                   df.at[index,'types'] = 'uncategorized'
 
         extract()
+
+        from http.client import HTTPSConnection
+        from json import loads
+        from json import dumps
 
         class RestClient:
             domain = "api.wordlift.io"
@@ -352,6 +360,8 @@ def main():
 
         response = client.post("/keywords_data/google/search_volume/live", post_data)
 
+        from pandas import json_normalize
+
         if response["status_code"] == 20000: response.keys() # print(state.response)
         else: print("error. Code: %d Message: %s" % (response["status_code"], response["status_message"]))
 
@@ -388,6 +398,8 @@ def main():
         placeholder3 = st.empty()
         placeholder3.info("Preparing data for visualization ⏳ ...")
 
+        from pandas import Series
+
         s = df4_merged.apply(lambda x: pd.Series(x['types'],), axis=1).stack().reset_index(level=1, drop=True)
         s.name = 'types'
         df5 = df4_merged.drop('types', axis=1).join(s)
@@ -400,6 +412,9 @@ def main():
         df6['entities'] = pd.Series(df6['entities'], dtype=object)
 
         placeholder3.info("Visualizing ⏳ ...")
+
+        import plotly.express as px
+        import numpy as np
 
         # 1
         fig1 = px.histogram(df6, x='entities').update_xaxes(categoryorder="total descending")

@@ -9,6 +9,7 @@ footer {
 /* */
 body {
     background-color: rgb(245, 250, 255);
+    background-image: url("img/pattern.png");
 }
 
 /* Sidebar */
