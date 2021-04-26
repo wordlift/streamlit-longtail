@@ -26,20 +26,20 @@ $ streamlit run app.py
 
 ## Main Files:
   ```sh
+
   .
+  ├── Dockerfile
+  ├── Interface.py
   ├── README.md
   ├── app.py *** driver of the app
-  ├── apps
-  │   ├── spacyapi.py
-  │   └── wordliftapi.py
-  ├── functions
-  │   ├── download.py
-  │   └── interface.py
+  ├── config.toml
+  ├── credentials.toml
+  ├── download.py
   ├── img
   │   ├── fav-ico.png
   │   ├── logo-wordlift.png
   │   └── pattern.png
-  ├── multiapp.py *** framework
   ├── requirements.txt *** The dependencies we need to install with "pip install -r requirements.txt"
   └── style.css
+
   ```
