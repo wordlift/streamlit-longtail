@@ -10,8 +10,8 @@ $ cd my/directory
 ```
 2. Virtual environment:
 ```
-$ python3.7 -m venv ~/.streamlit_ve
-$ source ~/.streamlit_ve/bin/activate
+$ python3.7 -m venv ~/.virtual_env_name
+$ source ~/.virtual_env_name/bin/activate
 ```
 3. Install dependencies:
 ```
@@ -24,7 +24,7 @@ $ streamlit run app.py
 ```
 
 
-## Main Files: Project Structure
+## Main Files:
   ```sh
   .
   ├── README.md

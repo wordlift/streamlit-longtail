@@ -1,18 +1,43 @@
-import streamlit as st
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Jan 11 2021
 
-from fake_useragent import UserAgent
+@author: AndreaVolpini
+@co-author: RaffalShafiei
+"""
+
+# ---------------------------------------------------------------------------- #
+# Imports
+# ---------------------------------------------------------------------------- #
+import streamlit as st
+import pandas as pd
 
 import time
-from random import randint
 import pprint
-import pandas as pd
 import re
-import requests, json
+import requests
+import json
 
-import SessionState
-from src.Interface import *
-from src.download import *
+from fake_useragent import UserAgent
+from random import randint
 
+import spacy
+from collections import Counter
+import en_core_web_sm
+from http.client import HTTPSConnection
+from json import loads
+from json import dumps
+from pandas import json_normalize
+from pandas import Series
+import plotly.express as px
+import numpy as np
+
+from Interface import *
+from download import *
+
+# ---------------------------------------------------------------------------- #
+# App Config.
+# ---------------------------------------------------------------------------- #
 PAGE_CONFIG = {
     "page_title":"Free SEO Tools by WordLift",
     "page_icon":"img/fav-ico.png",
@@ -20,123 +45,116 @@ PAGE_CONFIG = {
     }
 st.set_page_config(**PAGE_CONFIG)
 
-# This will hide the hamburger menu of streamlit completely.
-hide_streamlit_style = """
-<style>
-    #MainMenu {
-        visibility: hidden;
-    }
+local_css("style.css")
+set_png_as_page_bg('img/pattern.png')
 
-    footer {
-        visibility: hidden;
-    }
-</style>
-"""
-st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+# 1st API
+def page_WordLift():
+    st.write("---")
 
+# 2nd API
+def page_SpaCy():
+    st.write("---")
+
+# ---------------------------------------------------------------------------- #
+# Functions
+# ---------------------------------------------------------------------------- #
+
+# ---------------------------------------------------------------------------- #
+# Sidebar
+# ---------------------------------------------------------------------------- #
+st.sidebar.image("img/logo-wordlift.png", width=200)
+st.sidebar.title("Navigation")
+page = st.sidebar.radio("Select your API", tuple(pages.keys()))
+st.sidebar.info("You will need a WordLift key. You can [get one for free](https://wordlift.io/checkout/) for 14 days.")
+
+# ---------------------------------------------------------------------------- #
+# Web Application
+# ---------------------------------------------------------------------------- #
+st.markdown('<p class="subject"> 🔥 Content Idea Generator 🔥</p>', unsafe_allow_html=True)
+st.markdown('<p class="payoff"> Get instant, untapped content ideas </p>', unsafe_allow_html=True)
+pages[page]()
+st.markdown('<p class="question"> How it works? </p>', unsafe_allow_html=True)
+st.markdown("""
+<p class="answer">
+    WordLift will “read” autocomplete data from Google, scan it using the
+    Knowledge Graph from your website (or the SpaCy API) then quickly analyze
+    every search opportunity to help you create super-useful content.
+</p>
+""", unsafe_allow_html=True)
+
+# | Languages       | Countries
+# |                 |
+# ______________________________________
+# | en (english)    | us, uk, au, in, ca
+# | it (italian)    | it
+# | de (german)     | de
+# | nl (dutch)      | nl (netherlands), bel (Belgium)
+# | pt (portuguese) | pt, br
+# | es (spanish)    | es
+# | fr (french)     | fr
+
+languages = ["en", "it", "de", "nl", "pt", "es", "fr"]
+countries = ["us", "uk", "au", "in", "ca", # countries that speak English
+             "it", # countries that speak italian
+             "de", # countries that speak German
+             "nl", "bel", # countries that speak dutch
+             "pt", "br", # countries that speak portuguese
+             "es", # countries that speak spanish
+             "fr"] # countries that speak french
+col1, col2, col3 = st.beta_columns(3)
+col4, col5, col6 = st.beta_columns(3)
+with col1: state.lang_option = st.selectbox("Select Language", languages)
+with col2: state.country_option = st.selectbox("Select Country", countries)
+with col3: state.WL_key_ti = st.text_input("Enter your WordLift key")
+with col4: state.first_idea = st.text_input("What is the first idea?")
+with col5: state.second_idea = st.text_input("What is the second idea?")
+with col6: state.third_idea = st.text_input("What is the third idea?")
+st.write("---")
+
+size = ['Small (25 Queries)', 'Medium (50 Queries)', 'Large (100 Queries)', 'X-Large (700 Queries)']
+size_navigation = st.radio('Please specify preferred queries list size, then press Submit', size)
+
+button_submit = st.button("Submit")
+st.write("---")
+
+# ---------------------------------------------------------------------------- #
+# Main Function
+# ---------------------------------------------------------------------------- #
 def main():
 
-    local_css("style.css")
-    set_png_as_page_bg('img/pattern.png')
-
-    state = SessionState.get(name="", button_submit=False)
-
-    pages = {
-        "WordLift": page_WordLift,
-        "SpaCy": page_SpaCy,
-    }
-
-    st.sidebar.image("img/logo-wordlift.png", width=200)
-    st.sidebar.title("Navigation")
-    page = st.sidebar.radio("Select your API", tuple(pages.keys()))
-
-    st.sidebar.info("You will need a WordLift key. You can [get one for free](https://wordlift.io/checkout/) for 14 days.")
-
-    st.markdown('<p class="subject"> 🔥 Content Idea Generator 🔥</p>', unsafe_allow_html=True)
-    st.markdown('<p class="payoff"> Get instant, untapped content ideas </p>', unsafe_allow_html=True)
-    st.write("---")
-    st.markdown('<p class="question"> How it works? </p>', unsafe_allow_html=True)
-    st.markdown("""
-    <p class="answer">
-        WordLift will “read” autocomplete data from Google, scan it using the
-        Knowledge Graph from your website (or the SpaCy API) then quickly analyze
-        every search opportunity to help you create super-useful content.
-    </p>
-    """, unsafe_allow_html=True)
-
-    # Display the selected page with the session state
-    pages[page](state)
-
-    # | Languages       | Countries
-    # |                 |
-    # ______________________________________
-    # | en (english)    | us, uk, au, in, ca
-    # | it (italian)    | it
-    # | de (german)     | de
-    # | nl (dutch)      | nl (netherlands), bel (Belgium)
-    # | pt (portuguese) | pt, br
-    # | es (spanish)    | es
-    # | fr (french)     | fr
-
-    # ممكن نستخدم فكرة المفاتيح هنا، عشان ما يطلع لليوزر اختصارات، تطلع له اسم الدولة وعندنا احنا اختصارات
-    languages = ["en", "it", "de", "nl", "pt", "es", "fr"]
-    countries = ["us", "uk", "au", "in", "ca", # countries that speak English
-                 "it", # countries that speak italian
-                 "de", # countries that speak German
-                 "nl", "bel", # countries that speak dutch
-                 "pt", "br", # countries that speak portuguese
-                 "es", # countries that speak spanish
-                 "fr"] # countries that speak french
-    col1, col2, col3 = st.beta_columns(3)
-    col4, col5, col6 = st.beta_columns(3)
-    with col1: state.lang_option = st.selectbox("Select Language", languages)
-    with col2: state.country_option = st.selectbox("Select Country", countries)
-    with col3: state.WL_key_ti = st.text_input("Enter your WordLift key")
-    with col4: state.first_idea = st.text_input("What is the first idea?")
-    with col5: state.second_idea = st.text_input("What is the second idea?")
-    with col6: state.third_idea = st.text_input("What is the third idea?")
-    st.write("---")
-
-    size = ['Small (25 Queries)', 'Medium (50 Queries)', 'Large (100 Queries)', 'X-Large (700 Queries)']
-    state.size_navigation = st.radio('Please specify preferred queries list size, then press Submit', size)
-
-    button_submit = st.button("Submit")
-
     if button_submit:
-        state.button_submit = True
 
-    if state.button_submit:
+        language = lang_option
+        country = country_option
 
-        language = state.lang_option
-        country = state.country_option
-
-        if state.WL_key_ti:
-            WL_key = state.WL_key_ti
-        elif not state.WL_key_ti:
+        if WL_key_ti:
+            WL_key = WL_key_ti
+        elif not WL_key_ti:
             st.error("Please provide your WordLift key to proceed.")
             st.stop()
 
-        if state.size_navigation == 'Small (25 Queries)': state.list_size = 25
-        elif state.size_navigation == 'Medium (50 Queries)': state.list_size = 50
-        elif state.size_navigation == 'Large (100 Queries)': state.list_size = 100
-        elif state.size_navigation == 'X-Large (700 Queries)': state.list_size = 700
+        if size_navigation == 'Small (25 Queries)': list_size = 25
+        elif size_navigation == 'Medium (50 Queries)': list_size = 50
+        elif size_navigation == 'Large (100 Queries)': list_size = 100
+        elif size_navigation == 'X-Large (700 Queries)': list_size = 700
 
         sucsess = st.empty()
-        if not (state.first_idea or state.second_idea or state.third_idea):
+        if not (first_idea or second_idea or third_idea):
             st.error("You have not typed any ideas! Please type at least two ideas, then press Submit")
             st.stop()
-        elif state.first_idea:
-            if state.second_idea:
-                if state.third_idea:
+        elif first_idea:
+            if second_idea:
+                if third_idea:
                     sucsess.success("SUCCESS!")
-                    state.keyword_list = state.first_idea + ', ' + state.second_idea + ', ' + state.third_idea
-                elif not state.third_idea:
+                    keyword_list = first_idea + ', ' + second_idea + ', ' + third_idea
+                elif not third_idea:
                     sucsess.success("SUCCESS!")
-                    state.keyword_list = state.first_idea + ', ' + state.second_idea
-            elif not (state.second_idea or state.third_idea):
-                st.error("You have typed only one idea! Please type at least two ideas, then press Submit")
-                st.stop()
-        state.keyword_list = state.keyword_list.strip('][').split(', ') # converting string into list
+                    keyword_list = first_idea + ', ' + second_idea
+            elif not (second_idea or third_idea):
+                sucsess.success("SUCCESS!")
+                keyword_list = first_idea
+        keyword_list = keyword_list.strip('][').split(', ') # converting string into list
 
         @st.cache(show_spinner = False)
         def autocomplete(query):
@@ -146,8 +164,6 @@ def main():
             lan = language
 
             time.sleep(randint(0, 2))
-
-            import requests, json
 
             URL = 'http://suggestqueries.google.com/complete/search?client=firefox&gl={0}&q={1}&hl={2}'.format(tld,query,lan)
 
@@ -159,6 +175,7 @@ def main():
         placeholder1 = st.empty()
         info1 = st.empty()
         info2 = st.empty()
+
         @st.cache(suppress_st_warning = True, show_spinner = False)
         def generate_keywords(query):
 
@@ -184,9 +201,9 @@ def main():
             return keyword_suggestions
 
         placeholder1.info("Expanding initial ideas using Google's autocomplete")
-        state.keywords = [generate_keywords(q) for q in state.keyword_list]
-        state.keywords = [query for sublist in state.keywords for query in sublist] # to flatten
-        state.keywords = list(set(state.keywords)) # to de-duplicate
+        keywords = [generate_keywords(q) for q in keyword_list]
+        keywords = [query for sublist in keywords for query in sublist] # to flatten
+        keywords = list(set(keywords)) # to de-duplicate
         st.write("---")
         sucsess.empty()
         info1.empty()
@@ -200,10 +217,10 @@ def main():
         placeholder2 = st.empty()
         placeholder2.info("Analyzing the queries we have generated ⏳ ...")
 
-        state.df = pd.DataFrame(state.keywords, columns =['queries'])
-        state.df = state.df.head(state.list_size)
-        state.df['entities'] = ''
-        state.df['types'] = ''
+        df = pd.DataFrame(keywords, columns =['queries'])
+        df = df.head(list_size)
+        df['entities'] = ''
+        df['types'] = ''
 
         entity_data = []
         type_data = []
@@ -245,10 +262,6 @@ def main():
             type_data = entities[1]
             return entity_data, type_data
 
-        import spacy
-        from collections import Counter
-        import en_core_web_sm
-
         nlp = en_core_web_sm.load()
 
         # Extracting entities and types using SpaCy
@@ -260,28 +273,23 @@ def main():
 
         placeholder2.info("Extracting entities from queries ⏳ ...")
 
-        # @st.cache(show_spinner = False)
         def extract():
             # Iterating through queries
-            for index, row in state.df.iterrows():
+            for index, row in df.iterrows():
 
-                if pages["WordLift"]: # WordLift
-                    data_x = wl_string_to_entities(state.df['queries'][index]) # extracting entities
-                elif pages["SpaCy"]: # SpaCy
-                    data_x = string_to_entities(state.df['queries'][index]) # extracting entities
+                if page == "WordLift": # 1) WordLift
+                    data_x = wl_string_to_entities(df['queries'][index]) # extracting entities
+                if page == "SpaCy": # 2) SpaCy
+                    data_x = string_to_entities(df['queries'][index]) # extracting entities
 
                 if len(data_x[0]) is not 0: # make sure there are entities
-                  state.df.at[index,'entities'] = data_x[0]
-                  state.df.at[index,'types'] = data_x[1]
+                  df.at[index,'entities'] = data_x[0]
+                  df.at[index,'types'] = data_x[1]
                 else:
-                  state.df.at[index,'entities'] = 'n.a.'
-                  state.df.at[index,'types'] = 'uncategorized'
+                  df.at[index,'entities'] = 'n.a.'
+                  df.at[index,'types'] = 'uncategorized'
 
         extract()
-
-        from http.client import HTTPSConnection
-        from json import loads
-        from json import dumps
 
         class RestClient:
             domain = "api.wordlift.io"
@@ -310,7 +318,7 @@ def main():
                 return self.request(path, 'POST', data_str)
 
         placeholder2.info("Adding keyword data ⏳ ...")
-        state.client = RestClient()
+        client = RestClient()
 
         if language == 'en': language_name1="English"
         elif language == 'it': language_name1="Italian"
@@ -334,167 +342,90 @@ def main():
         elif country == 'es': location_name1="Spain"
         elif country == 'fr': location_name1="France"
 
-        state.post_data = dict()
-        state.post_data[len(state.post_data)] = dict(
+        post_data = dict()
+        post_data[len(post_data)] = dict(
             location_name=location_name1,
             language_name=language_name1,
-            keywords=state.df['queries'].tolist()
+            keywords=df['queries'].tolist()
         )
 
-        state.response = state.client.post("/keywords_data/google/search_volume/live", state.post_data)
+        response = client.post("/keywords_data/google/search_volume/live", post_data)
 
-        if state.response["status_code"] == 20000: state.response.keys() # print(state.response)
-        else: print("error. Code: %d Message: %s" % (state.response["status_code"], state.response["status_message"]))
+        if response["status_code"] == 20000: response.keys() # print(state.response)
+        else: print("error. Code: %d Message: %s" % (response["status_code"], response["status_message"]))
 
-        from pandas import json_normalize
-        # state.response.keys()
-        state.keyword_df = json_normalize(data=state.response['tasks'][0]['result'])
+        keyword_df = json_normalize(data=response['tasks'][0]['result'])
 
-        state.keyword_df.rename(columns={'keyword': 'queries'}, inplace=True)
+        keyword_df.rename(columns={'keyword': 'queries'}, inplace=True)
 
         placeholder2.info("Merging queries with keyword data ⏳ ...")
-        state.df4_merged = state.df.merge(state.keyword_df, how='right', on='queries')
+        df4_merged = df.merge(keyword_df, how='right', on='queries')
 
         placeholder2.info("Preparing your CSV file ⏳ ...")
-        state.cleanQuery = re.sub('\W+','', state.keyword_list[0])
-        state.file_name = state.cleanQuery + ".csv"
-        state.df4_merged.to_csv(state.file_name, encoding='utf-8', index=True)
-        state.csv_download_button = download_button(state.df4_merged, state.file_name, 'Download List')
+        cleanQuery = re.sub('\W+','', keyword_list[0])
+        file_name = cleanQuery + ".csv"
+        df4_merged.to_csv(file_name, encoding='utf-8', index=True)
+        csv_download_button = download_button(df4_merged, file_name, 'Download List')
         placeholder2.empty()
 
-        # شكللي حاررجع البروقرس بار القديم الي من دون تقدم
-        state.pb1 = progress_bar(state.list_size)
-        state.b1 = balloons("list of queries")
+        pb1 = progress_bar(list_size)
+        b1 = balloons("list of queries")
         mark1.empty()
-        state.four = st.dataframe(state.df4_merged)
+        four = st.dataframe(df4_merged)
 
-        st.write("Total number of queries saved on (", state.file_name, ")is",len(state.df))
-        st.markdown(state.csv_download_button, unsafe_allow_html=True)
+        st.write("Total number of queries saved on (", file_name, ")is",len(df))
+        st.markdown(csv_download_button, unsafe_allow_html=True)
         st.write("---")
 
-
-
-
-
-        # -------------------------------------------------------------------------------------------------------------------------------------------------------
-        # -------------------------------------------------------------------------------------------------------------------------------------------------------
-        # -------------------------------------------------------------------------------------------------------------------------------------------------------
-        # -------------------------------------------------------------------------------------------------------------------------------------------------------
-        # -------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-
+        # ---------------------------------------------------------------------------- #
+        # Treemaps
+        # ---------------------------------------------------------------------------- #
         st.header(":rocket: Treemaps")
         mark2 = st.empty()
         mark2.markdown("Please wait while we prepare your treemaps...")
 
         placeholder3 = st.empty()
         placeholder3.info("Preparing data for visualization ⏳ ...")
-        from pandas import Series
 
-        state.s = state.df4_merged.apply(lambda x: pd.Series(x['types'],), axis=1).stack().reset_index(level=1, drop=True)
-        state.s.name = 'types'
-        state.df5 = state.df4_merged.drop('types', axis=1).join(state.s)
-        state.df5['types'] = pd.Series(state.df5['types'], dtype=object)
+        s = df4_merged.apply(lambda x: pd.Series(x['types'],), axis=1).stack().reset_index(level=1, drop=True)
+        s.name = 'types'
+        df5 = df4_merged.drop('types', axis=1).join(s)
+        df5['types'] = pd.Series(df5['types'], dtype=object)
 
-        state.p = state.df5.apply(lambda x: pd.Series(x['entities'],), axis=1).stack().reset_index(level=1, drop=True)
-        state.p.name = 'entities'
+        p = df5.apply(lambda x: pd.Series(x['entities'],), axis=1).stack().reset_index(level=1, drop=True)
+        p.name = 'entities'
 
-        state.df6 = state.df5.drop('entities', axis=1).join(state.p)
-        state.df6['entities'] = pd.Series(state.df6['entities'], dtype=object)
+        df6 = df5.drop('entities', axis=1).join(p)
+        df6['entities'] = pd.Series(df6['entities'], dtype=object)
 
         placeholder3.info("Visualizing ⏳ ...")
 
-        import plotly.express as px
-        import numpy as np
-
         # 1
-        state.fig1 = px.histogram(state.df6, x='entities').update_xaxes(categoryorder="total descending")
+        fig1 = px.histogram(df6, x='entities').update_xaxes(categoryorder="total descending")
 
         # 2
-        state.df6['all'] = 'all' # in order to have a single root node
-        state.fig2 = px.treemap(state.df6, path=['all','types','entities','queries'], color='entities')
-
-        # 3
-        state.fig3 = px.treemap(state.df6, path=['entities'], values='competition', color='competition', color_continuous_scale='Blues')
-
-        # 4
-        state.df6 = state.df6.dropna(subset=['search_volume', 'competition']) # remove rows when there are missing values
-        state.fig4 = px.treemap(state.df6, path=['all','entities','queries'], values='search_volume',
-                                color='search_volume',
-                                color_continuous_scale='Blues')
-
-        # 5
-        state.fig5 = px.treemap(state.df6, path=['all','entities','queries'], values='competition',
-                                color='competition',
-                                color_continuous_scale='purpor')
+        df6['all'] = 'all' # in order to have a single root node
+        fig2 = px.treemap(df6, path=['all','types','entities','queries'], color='entities')
 
         # 6
-        state.fig6 = px.treemap(state.df6, path=['all','entities','queries'], values='search_volume',
+        fig6 = px.treemap(df6, path=['all','entities','queries'], values='search_volume',
                                 color='competition',
                                 color_continuous_scale='blues',
-                                color_continuous_midpoint=np.average(state.df6['competition'], weights=state.df6['search_volume']))
+                                color_continuous_midpoint=np.average(df6['competition'], weights=df6['search_volume']))
 
         placeholder3.empty()
 
-        state.pb2 = progress_bar(state.list_size)
-        state.b2 = balloons("treemap")
+        pb2 = progress_bar(list_size)
+        b2 = balloons("treemap")
         mark2.empty()
 
-        # make it a checkbox
-        # t1, t2, t3, t4, t5, t6 = st.beta_columns(6)
-        # with t1: state.treemap1 = st.checkbox("Show Top Entities", True)
-        # with t2: state.treemap2 = st.checkbox("Show Intents by Type and Entity")
-        # with t3: state.treemap3 = st.checkbox("Show Intents by Entity and Search Volume")
-        # with t4: state.treemap4 = st.checkbox("Show Intents by Search Volume and Competition")
-        # with t5: state.treemap5 = st.checkbox("Show Intents by Entity and Competition")
-        # with t6: state.treemap6 = st.checkbox("Show Intents by Entity, Search Volume and Competition")
-
         # 1
-        # if state.treemap1:
-        st.subheader("Top Entities")
-        state.first = st.plotly_chart(state.fig1, use_container_width=True)
-
-        # 2
-        # if state.treemap2:
-        st.subheader("Intents by Type and Entity")
-        state.second = st.plotly_chart(state.fig2, use_container_width=True)
-
-        # 3
-        # if state.treemap3:
-        st.subheader("Intents by Entity and Search Volume")
-        state.third = st.plotly_chart(state.fig3, use_container_width=True)
-
-        # 4
-        # if state.treemap4:
-        st.subheader("Intents by Search Volume and Competition")
-        state.fourth = st.plotly_chart(state.fig4, use_container_width=True)
-
-        # 5
-        # if state.treemap5:
-        st.subheader("Intents by Entity and Competition")
-        state.fifth = st.plotly_chart(state.fig5, use_container_width=True)
+        st.subheader("Top Entities") # ☑️
+        first = st.plotly_chart(fig1, use_container_width=True)
 
         # 6
-        # if state.treemap6:
-        st.subheader("Intents by Entity, Search Volume and Competition")
-        state.sixth = st.plotly_chart(state.fig6, use_container_width=True)
-
-        st.write("---")
-
-def page_WordLift(state):
-    st.write("---")
-
-def page_SpaCy(state):
-    st.write("---")
+        st.subheader("Intents by Entity, Search Volume and Competition") # ☑️
+        sixth = st.plotly_chart(fig6, use_container_width=True)
 
 if __name__ == "__main__":
     main()
-
-# ============
-
-##########################
-# Main
-##########################

@@ -1,3 +1,11 @@
+#MainMenu {
+    visibility: hidden;
+}
+
+footer {
+    visibility: hidden;
+}
+
 /* */
 body {
     background-color: rgb(245, 250, 255);
