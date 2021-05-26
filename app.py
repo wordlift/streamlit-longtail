@@ -74,7 +74,6 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # | Languages       | Countries
-# |                 |
 # ______________________________________
 # | en (english)    | us, uk, au, in, ca
 # | it (italian)    | it
@@ -84,14 +83,17 @@ st.markdown("""
 # | es (spanish)    | es
 # | fr (french)     | fr
 
+# ---------------------------------------------------------------------------- #
+# Getting ideas and context
+# ---------------------------------------------------------------------------- #
 languages = ["en", "it", "de", "nl", "pt", "es", "fr"]
 countries = ["us", "uk", "au", "in", "ca", # countries that speak English
-             "it", # countries that speak italian
+             "it", # countries that speak Italian
              "de", # countries that speak German
-             "nl", "bel", # countries that speak dutch
-             "pt", "br", # countries that speak portuguese
-             "es", # countries that speak spanish
-             "fr"] # countries that speak french
+             "nl", "bel", # countries that speak Dutch
+             "pt", "br", # countries that speak Portuguese
+             "es", # countries that speak Spanish
+             "fr"] # countries that speak French
 col1, col2, col3 = st.beta_columns(3)
 col4, col5, col6 = st.beta_columns(3)
 with col1: lang_option = st.selectbox("Select Language", languages)
@@ -224,9 +226,27 @@ def main():
         df['entities'] = ''
         df['types'] = ''
 
+        # ---------------------------------------------------------------------------- #
+        # Run NER with SpaCy
+        # ---------------------------------------------------------------------------- #
+        import spacy
+        from collections import Counter
+        import en_core_web_sm
+        nlp = en_core_web_sm.load()
+
+        # Extracting entities and types using SpaCy
+        def string_to_entities(text):
+            entities = nlp(text)
+            entity_data = [x.text for x in entities.ents]
+            type_data = [x.label_ for x in entities.ents]
+            return entity_data, type_data
+
         entity_data = []
         type_data = []
 
+        # ---------------------------------------------------------------------------- #
+        # Run NER with WordLift
+        # ---------------------------------------------------------------------------- #
         @st.cache(show_spinner = False)
         def wl_nlp(text, language, key):
 
@@ -264,20 +284,11 @@ def main():
             type_data = entities[1]
             return entity_data, type_data
 
-        import spacy
-        from collections import Counter
-        import en_core_web_sm
-        nlp = en_core_web_sm.load()
-
-        # Extracting entities and types using SpaCy
-        def string_to_entities(text):
-            entities = nlp(text)
-            entity_data = [x.text for x in entities.ents]
-            type_data = [x.label_ for x in entities.ents]
-            return entity_data, type_data
-
         placeholder2.info("Extracting entities from queries ⏳ ...")
 
+        # ---------------------------------------------------------------------------- #
+        # Extracting Entities from Queries
+        # ---------------------------------------------------------------------------- #
         def extract():
             # Iterating through queries
             for index, row in df.iterrows():
@@ -296,6 +307,9 @@ def main():
 
         extract()
 
+        # ---------------------------------------------------------------------------- #
+        # Adding keyword data
+        # ---------------------------------------------------------------------------- #
         from http.client import HTTPSConnection
         from json import loads
         from json import dumps
@@ -327,6 +341,7 @@ def main():
                 return self.request(path, 'POST', data_str)
 
         placeholder2.info("Adding keyword data ⏳ ...")
+
         client = RestClient()
 
         if language == 'en': language_name1="English"
@@ -352,20 +367,25 @@ def main():
         elif country == 'fr': location_name1="France"
 
         post_data = dict()
+        # here is the basic settings
         post_data[len(post_data)] = dict(
             location_name=location_name1,
             language_name=language_name1,
             keywords=df['queries'].tolist()
-        )
+            )
 
         response = client.post("/keywords_data/google/search_volume/live", post_data)
 
+        if response["status_code"] == 20000:
+            print(response)
+
+        else:
+            print("error. Code: %d Message: %s" % (response["status_code"], response["status_message"]))
+
         from pandas import json_normalize
-
-        if response["status_code"] == 20000: response.keys() # print(state.response)
-        else: print("error. Code: %d Message: %s" % (response["status_code"], response["status_message"]))
-
-        keyword_df = json_normalize(data=response['tasks'][0]['result'])
+        response.keys()
+        keyword_df = json_normalize(
+          data=response['tasks'][0]['result'])
 
         keyword_df.rename(columns={'keyword': 'queries'}, inplace=True)
 
