@@ -52,7 +52,27 @@ pages = {
 # ---------------------------------------------------------------------------- #
 st.sidebar.image("img/logo-wordlift.png", width=200)
 st.sidebar.title("Navigation")
-page = st.sidebar.radio("Select your API", tuple(pages.keys()))
+page = st.sidebar.radio("Select API", tuple(pages.keys()))
+# | Languages       | Countries
+# ______________________________________
+# | en (english)    | us, uk, au, in, ca
+# | it (italian)    | it
+# | de (german)     | de
+# | nl (dutch)      | nl (netherlands), bel (Belgium)
+# | pt (portuguese) | pt, br
+# | es (spanish)    | es
+# | fr (french)     | fr
+languages = ["en", "it", "de", "nl", "pt", "es", "fr"]
+countries = ["us", "uk", "au", "in", "ca", # countries that speak English
+             "it", # countries that speak Italian
+             "de", # countries that speak German
+             "nl", "bel", # countries that speak Dutch
+             "pt", "br", # countries that speak Portuguese
+             "es", # countries that speak Spanish
+             "fr"] # countries that speak French
+lang_option = st.sidebar.selectbox("Select Language", languages)
+country_option = st.sidebar.selectbox("Select Country", countries)
+WL_key_ti = st.sidebar.text_input("Enter your WordLift key")
 st.sidebar.info("You will need a WordLift key. You can [get one for free](https://wordlift.io/checkout/) for 14 days.")
 
 # ---------------------------------------------------------------------------- #
@@ -70,39 +90,17 @@ st.markdown("""
 </p>
 """, unsafe_allow_html=True)
 
-# | Languages       | Countries
-# ______________________________________
-# | en (english)    | us, uk, au, in, ca
-# | it (italian)    | it
-# | de (german)     | de
-# | nl (dutch)      | nl (netherlands), bel (Belgium)
-# | pt (portuguese) | pt, br
-# | es (spanish)    | es
-# | fr (french)     | fr
-
 # ---------------------------------------------------------------------------- #
-# Getting ideas and context
+# Getting ideas
 # ---------------------------------------------------------------------------- #
-languages = ["en", "it", "de", "nl", "pt", "es", "fr"]
-countries = ["us", "uk", "au", "in", "ca", # countries that speak English
-             "it", # countries that speak Italian
-             "de", # countries that speak German
-             "nl", "bel", # countries that speak Dutch
-             "pt", "br", # countries that speak Portuguese
-             "es", # countries that speak Spanish
-             "fr"] # countries that speak French
+st.write("Enter Your Ideas")
 col1, col2, col3 = st.beta_columns(3)
-col4, col5, col6 = st.beta_columns(3)
-with col1: lang_option = st.selectbox("Select Language", languages)
-with col2: country_option = st.selectbox("Select Country", countries)
-with col3: WL_key_ti = st.text_input("Enter your WordLift key")
-with col4: first_idea = st.text_input("What is the first idea?")
-with col5: second_idea = st.text_input("What is the second idea?")
-with col6: third_idea = st.text_input("What is the third idea?")
-st.write("---")
+with col1: first_idea = st.text_input("First Idea")
+with col2: second_idea = st.text_input("Second Idea")
+with col3: third_idea = st.text_input("Third Idea")
 
-size = ['Small (25 Queries)', 'Medium (50 Queries)', 'Large (100 Queries)', 'X-Large (700 Queries)']
-size_navigation = st.radio('Please specify preferred queries list size, then press Submit', size)
+size = ['25', '50', '100', '700']
+size_navigation = st.radio('Number of Queries', size)
 
 button_submit = st.button("Submit")
 st.write("---")
@@ -123,10 +121,10 @@ def main():
             st.error("Please provide your WordLift key to proceed.")
             st.stop()
 
-        if size_navigation == 'Small (25 Queries)': list_size = 25
-        elif size_navigation == 'Medium (50 Queries)': list_size = 50
-        elif size_navigation == 'Large (100 Queries)': list_size = 100
-        elif size_navigation == 'X-Large (700 Queries)': list_size = 700
+        if size_navigation == '25': list_size = 25
+        elif size_navigation == '50': list_size = 50
+        elif size_navigation == '100': list_size = 100
+        elif size_navigation == '700': list_size = 700
 
         sucsess = st.empty()
         if not (first_idea or second_idea or third_idea):
