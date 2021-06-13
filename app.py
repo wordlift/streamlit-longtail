@@ -203,7 +203,7 @@ def main():
         keywords = [generate_keywords(q) for q in keyword_list]
         keywords = [query for sublist in keywords for query in sublist] # to flatten
         keywords = list(set(keywords)) # to de-duplicate
-        st.write("---")
+        
         sucsess.empty()
         info1.empty()
         info2.empty()
