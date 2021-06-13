@@ -431,14 +431,28 @@ def main():
         import plotly.express as px
         import numpy as np
 
-        # 1
+        # 1 Visualizing top entities
         fig1 = px.histogram(df6, x='entities').update_xaxes(categoryorder="total descending")
 
-        # 2
+        # 2 Intent by type and entity
         df6['all'] = 'all' # in order to have a single root node
         fig2 = px.treemap(df6, path=['all','types','entities','queries'], color='entities')
 
-        # 6
+        # 3 Intent by entity and search_volume
+        fig3 = px.treemap(df6, path=['entities'], values='competition', color='competition', color_continuous_scale='Blues')
+
+        # 4 Intent by search_volume and competition
+        df6 = df6.dropna(subset=['search_volume', 'competition']) # remove rows when there are missing values
+        fig4 = px.treemap(df6, path=['all','entities','queries'], values='search_volume',
+                  color='search_volume',
+                  color_continuous_scale='Blues')
+
+        # 5 Intent by Entity and Competition
+        fig5 = px.treemap(df6, path=['all','entities','queries'], values='competition',
+                  color='competition',
+                  color_continuous_scale='purpor')
+
+        # 6 Intent by Entity, Search Volume and Competition
         fig6 = px.treemap(df6, path=['all','entities','queries'], values='search_volume',
                                 color='competition',
                                 color_continuous_scale='blues',
