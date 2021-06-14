@@ -53,26 +53,6 @@ pages = {
 st.sidebar.image("img/logo-wordlift.png", width=200)
 st.sidebar.title("Navigation")
 page = st.sidebar.radio("Select API", tuple(pages.keys()))
-# | Languages       | Countries
-# ______________________________________
-# | en (english)    | us, uk, au, in, ca
-# | it (italian)    | it
-# | de (german)     | de
-# | nl (dutch)      | nl (netherlands), bel (Belgium)
-# | pt (portuguese) | pt, br
-# | es (spanish)    | es
-# | fr (french)     | fr
-languages = ["en", "it", "de", "nl", "pt", "es", "fr"]
-countries = ["us", "uk", "au", "in", "ca", # countries that speak English
-             "it", # countries that speak Italian
-             "de", # countries that speak German
-             "nl", "bel", # countries that speak Dutch
-             "pt", "br", # countries that speak Portuguese
-             "es", # countries that speak Spanish
-             "fr"] # countries that speak French
-lang_option = st.sidebar.selectbox("Select Language", languages)
-country_option = st.sidebar.selectbox("Select Country", countries)
-WL_key_ti = st.sidebar.text_input("Enter your WordLift key")
 st.sidebar.info("You will need a WordLift key. You can [get one for free](https://wordlift.io/checkout/) for 14 days.")
 
 # ---------------------------------------------------------------------------- #
@@ -91,13 +71,28 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ---------------------------------------------------------------------------- #
-# Getting ideas
-# ---------------------------------------------------------------------------- #
-st.write("Enter Your Ideas")
+# Getting ideas and Context
+# ---------------------------------------------------------------------------- #  | Languages       | Countries
+languages = ["en", "it", "de", "nl", "pt", "es", "fr"] #                          ______________________________________
+countries = ["us", "uk", "au", "in", "ca", # countries that speak English         | en (english)    | us, uk, au, in, ca
+             "it", # countries that speak Italian                                 | it (italian)    | it
+             "de", # countries that speak German                                  | de (german)     | de
+             "nl", "bel", # countries that speak Dutch                            | nl (dutch)      | nl (netherlands), bel (Belgium)
+             "pt", "br", # countries that speak Portuguese                        | pt (portuguese) | pt, br
+             "es", # countries that speak Spanish                                 | es (spanish)    | es
+             "fr"] # countries that speak French                                  | fr (french)     | fr
+
 col1, col2, col3 = st.beta_columns(3)
-with col1: first_idea = st.text_input("First Idea")
-with col2: second_idea = st.text_input("Second Idea")
-with col3: third_idea = st.text_input("Third Idea")
+col4, col5, col6 = st.beta_columns(3)
+
+with col1: lang_option = st.selectbox("Select Language", languages)
+with col2: country_option = st.selectbox("Select Country", countries)
+with col3: WL_key_ti = st.text_input("Enter your WordLift key")
+
+st.write("Enter Your Ideas")
+with col4: first_idea = st.text_input("First Idea")
+with col5: second_idea = st.text_input("Second Idea")
+with col6: third_idea = st.text_input("Third Idea")
 
 size = ['25', '50', '100', '700']
 size_navigation = st.radio('Number of Queries', size)
@@ -203,7 +198,7 @@ def main():
         keywords = [generate_keywords(q) for q in keyword_list]
         keywords = [query for sublist in keywords for query in sublist] # to flatten
         keywords = list(set(keywords)) # to de-duplicate
-        
+
         sucsess.empty()
         info1.empty()
         info2.empty()
@@ -434,26 +429,11 @@ def main():
         # 1 Visualizing top entities
         fig1 = px.histogram(df6, x='entities').update_xaxes(categoryorder="total descending")
 
-        # 2 Intent by type and entity
-        df6['all'] = 'all' # in order to have a single root node
-        fig2 = px.treemap(df6, path=['all','types','entities','queries'], color='entities')
+        # remove rows when there are missing values
+        df6 = df6.dropna(subset=['search_volume', 'competition'])
 
-        # 3 Intent by entity and search_volume
-        fig3 = px.treemap(df6, path=['entities'], values='competition', color='competition', color_continuous_scale='Blues')
-
-        # 4 Intent by search_volume and competition
-        df6 = df6.dropna(subset=['search_volume', 'competition']) # remove rows when there are missing values
-        fig4 = px.treemap(df6, path=['all','entities','queries'], values='search_volume',
-                  color='search_volume',
-                  color_continuous_scale='Blues')
-
-        # 5 Intent by Entity and Competition
-        fig5 = px.treemap(df6, path=['all','entities','queries'], values='competition',
-                  color='competition',
-                  color_continuous_scale='purpor')
-
-        # 6 Intent by Entity, Search Volume and Competition
-        fig6 = px.treemap(df6, path=['all','entities','queries'], values='search_volume',
+        # 2 Intent by Entity, Search Volume and Competition
+        fig2 = px.treemap(df6, path=['all','entities','queries'], values='search_volume',
                                 color='competition',
                                 color_continuous_scale='blues',
                                 color_continuous_midpoint=np.average(df6['competition'], weights=df6['search_volume']))
@@ -468,9 +448,9 @@ def main():
         st.subheader("Top Entities") # ☑️
         first = st.plotly_chart(fig1, use_container_width=True)
 
-        # 6
+        # 2
         st.subheader("Intents by Entity, Search Volume and Competition") # ☑️
-        sixth = st.plotly_chart(fig6, use_container_width=True)
+        second = st.plotly_chart(fig2, use_container_width=True)
 
 if __name__ == "__main__":
     main()
