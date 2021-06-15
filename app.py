@@ -20,7 +20,6 @@ import pandas as pd
 import re
 import requests, json
 
-
 from Interface import *
 from download import *
 

@@ -1,15 +1,9 @@
-/* #MainMenu {
-    visibility: hidden;
-} */
-
-footer {
+#MainMenu {
     visibility: hidden;
 }
 
-/* background image */
-body {
-    background-color: rgb(245, 250, 255);
-    background-image: url("img/pattern.png");
+footer {
+    visibility: hidden;
 }
 
 /* Sidebar */
