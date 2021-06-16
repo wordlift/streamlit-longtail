@@ -51,7 +51,7 @@ pages = {
 # ---------------------------------------------------------------------------- #
 st.sidebar.image("img/logo-wordlift.png", width=200)
 st.sidebar.title("Navigation")
-page = st.sidebar.radio("Select API", tuple(pages.keys()))
+page = st.sidebar.radio("Select your API", tuple(pages.keys()))
 st.sidebar.info("You will need a WordLift key. You can [get one for free](https://wordlift.io/checkout/) for 14 days.")
 
 # ---------------------------------------------------------------------------- #
@@ -83,18 +83,18 @@ countries = ["us", "uk", "au", "in", "ca", # countries that speak English       
 
 col1, col2, col3 = st.beta_columns(3)
 col4, col5, col6 = st.beta_columns(3)
+st.write("---")
 
 with col1: lang_option = st.selectbox("Select Language", languages)
 with col2: country_option = st.selectbox("Select Country", countries)
 with col3: WL_key_ti = st.text_input("Enter your WordLift key")
 
-st.write("Enter Your Ideas")
-with col4: first_idea = st.text_input("First Idea")
-with col5: second_idea = st.text_input("Second Idea")
-with col6: third_idea = st.text_input("Third Idea")
+with col4: first_idea = st.text_input("What is the first idea?")
+with col5: second_idea = st.text_input("What is the second idea?")
+with col6: third_idea = st.text_input("What is the third idea?")
 
-size = ['25', '50', '100', '700']
-size_navigation = st.radio('Number of Queries', size)
+size = ['Small (25 Queries)', 'Medium (50 Queries)', 'Large (100 Queries)', 'X-Large (700 Queries)']
+size_navigation = st.radio('Please specify preferred queries list size, then press Submit', size)
 
 button_submit = st.button("Submit")
 st.write("---")
@@ -115,10 +115,10 @@ def main():
             st.error("Please provide your WordLift key to proceed.")
             st.stop()
 
-        if size_navigation == '25': list_size = 25
-        elif size_navigation == '50': list_size = 50
-        elif size_navigation == '100': list_size = 100
-        elif size_navigation == '700': list_size = 700
+        if size_navigation == 'Small (25 Queries)': list_size = 25
+        elif size_navigation == 'Medium (50 Queries)': list_size = 50
+        elif size_navigation == 'Large (100 Queries)': list_size = 100
+        elif size_navigation == 'X-Large (700 Queries)': list_size = 700
 
         sucsess = st.empty()
         if not (first_idea or second_idea or third_idea):
