@@ -428,6 +428,9 @@ def main():
         # 1 Visualizing top entities
         fig1 = px.histogram(df6, x='entities').update_xaxes(categoryorder="total descending")
 
+        # in order to have a single root node
+        df6['all'] = 'all'
+
         # remove rows when there are missing values
         df6 = df6.dropna(subset=['search_volume', 'competition'])
 
