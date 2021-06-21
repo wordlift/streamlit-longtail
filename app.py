@@ -57,7 +57,7 @@ st.sidebar.info("You will need a WordLift key. You can [get one for free](https:
 # ---------------------------------------------------------------------------- #
 # Web Application
 # ---------------------------------------------------------------------------- #
-st.markdown('<p class="subject"> here 🔥 Content Idea Generator 🔥 </p>', unsafe_allow_html=True)
+st.markdown('<p class="subject"> 🔥 Content Idea Generator 🔥 </p>', unsafe_allow_html=True)
 st.markdown('<p class="payoff"> Get instant, untapped content ideas </p>', unsafe_allow_html=True)
 pages[page]()
 st.markdown('<p class="question"> How it works? </p>', unsafe_allow_html=True)
