@@ -20,6 +20,10 @@ Created on Tue Jan 11 2021
 from Interface import *
 from download import *
 
+# dirty fix for the SSL bug
+import ssl
+ssl._create_default_https_context = ssl._create_unverified_context
+
 # ---------------------------------------------------------------------------- #
 # App Config.
 # ---------------------------------------------------------------------------- #
@@ -52,13 +56,16 @@ pages = {
 st.sidebar.image("img/logo-wordlift.png", width=200)
 st.sidebar.title("Navigation")
 page = st.sidebar.radio("Select your API", tuple(pages.keys()))
-st.sidebar.info("You will need a WordLift key. You can [get one for free](https://wordlift.io/checkout/) for 14 days.")
+st.sidebar.info(
+    "You will need a WordLift key. You can [get one for free](https://wordlift.io) for 14 days.")
 
 # ---------------------------------------------------------------------------- #
 # Web Application
 # ---------------------------------------------------------------------------- #
-st.markdown('<p class="subject"> 🔥 Content Idea Generator 🔥 </p>', unsafe_allow_html=True)
-st.markdown('<p class="payoff"> Get instant, untapped content ideas </p>', unsafe_allow_html=True)
+st.markdown('<p class="subject"> 🔥 Content Idea Generator 🔥 </p>',
+            unsafe_allow_html=True)
+st.markdown('<p class="payoff"> Get instant, untapped content ideas </p>',
+            unsafe_allow_html=True)
 pages[page]()
 st.markdown('<p class="question"> How it works? </p>', unsafe_allow_html=True)
 st.markdown("""
@@ -72,31 +79,44 @@ st.markdown("""
 # ---------------------------------------------------------------------------- #
 # Getting ideas and Context
 # ---------------------------------------------------------------------------- #  | Languages       | Countries
-languages = ["en", "it", "de", "nl", "pt", "es", "fr"]  # ______________________________________
+# ______________________________________
+languages = ["en", "it", "de", "nl", "pt", "es", "fr"]
 countries = ["us", "uk", "au", "in", "ca",
              # countries that speak English         | en (english)    | us, uk, au, in, ca
-             "it",  # countries that speak Italian                                 | it (italian)    | it
-             "de",  # countries that speak German                                  | de (german)     | de
+             # countries that speak Italian                                 | it (italian)    | it
+             "it",
+             # countries that speak German                                  | de (german)     | de
+             "de",
              "nl", "bel",
              # countries that speak Dutch                            | nl (dutch)      | nl (netherlands), bel (Belgium)
-             "pt", "br",  # countries that speak Portuguese                        | pt (portuguese) | pt, br
-             "es",  # countries that speak Spanish                                 | es (spanish)    | es
+             # countries that speak Portuguese                        | pt (portuguese) | pt, br
+             "pt", "br",
+             # countries that speak Spanish                                 | es (spanish)    | es
+             "es",
              "fr"]  # countries that speak French                                  | fr (french)     | fr
 
 col1, col2, col3 = st.columns(3)
 col4, col5, col6 = st.columns(3)
 st.write("---")
 
-with col1: lang_option = st.selectbox("Select Language", languages)
-with col2: country_option = st.selectbox("Select Country", countries)
-with col3: WL_key_ti = st.text_input("Enter your WordLift key")
+with col1:
+    lang_option = st.selectbox("Select Language", languages)
+with col2:
+    country_option = st.selectbox("Select Country", countries)
+with col3:
+    WL_key_ti = st.text_input("Enter your WordLift key")
 
-with col4: first_idea = st.text_input("What is the first idea?")
-with col5: second_idea = st.text_input("What is the second idea?")
-with col6: third_idea = st.text_input("What is the third idea?")
+with col4:
+    first_idea = st.text_input("What is the first idea?")
+with col5:
+    second_idea = st.text_input("What is the second idea?")
+with col6:
+    third_idea = st.text_input("What is the third idea?")
 
-size = ['Small (25 Queries)', 'Medium (50 Queries)', 'Large (100 Queries)', 'X-Large (700 Queries)']
-size_navigation = st.radio('Please specify preferred queries list size, then press Submit', size)
+size = ['Small (25 Queries)', 'Medium (50 Queries)',
+        'Large (100 Queries)', 'X-Large (700 Queries)']
+size_navigation = st.radio(
+    'Please specify preferred queries list size, then press Submit', size)
 
 button_submit = st.button("Submit")
 st.write("---")
@@ -131,7 +151,8 @@ def main():
 
         sucsess = st.empty()
         if not (first_idea or second_idea or third_idea):
-            st.error("You have not typed any ideas! Please type at least two ideas, then press Submit")
+            st.error(
+                "You have not typed any ideas! Please type at least two ideas, then press Submit")
             st.stop()
         elif first_idea:
             if second_idea:
@@ -144,7 +165,8 @@ def main():
             elif not (second_idea or third_idea):
                 sucsess.success("SUCCESS!")
                 keyword_list = first_idea
-        keyword_list = keyword_list.strip('][').split(', ')  # converting string into list
+        keyword_list = keyword_list.strip('][').split(
+            ', ')  # converting string into list
 
         # autocomplete
 
@@ -156,8 +178,10 @@ def main():
         from autocomplete import generate_keywords
 
         # placeholder1.info("Expanding initial ideas using Google's autocomplete")
-        keywords = [generate_keywords(q, country, language) for q in keyword_list]
-        keywords = [query for sublist in keywords for query in sublist]  # to flatten
+        keywords = [generate_keywords(q, country, language)
+                    for q in keyword_list]
+        # to flatten
+        keywords = [query for sublist in keywords for query in sublist]
         keywords = list(set(keywords))  # to de-duplicate
 
         sucsess.empty()
@@ -212,9 +236,11 @@ def main():
             for index, row in df.iterrows():
 
                 if page == "WordLift":  # 1) WordLift
-                    data_x = wl_string_to_entities(df['queries'][index], language, WL_key)  # extracting entities
+                    data_x = wl_string_to_entities(
+                        df['queries'][index], language, WL_key)  # extracting entities
                 if page == "SpaCy":  # 2) SpaCy
-                    data_x = string_to_entities(df['queries'][index])  # extracting entities
+                    data_x = string_to_entities(
+                        df['queries'][index])  # extracting entities
 
                 if len(data_x[0]) != 0:  # make sure there are entities
                     df.at[index, 'entities'] = data_x[0]
@@ -240,7 +266,8 @@ def main():
                 connection = HTTPSConnection(self.domain)
                 try:
                     headers = {'Authorization': 'Key ' + WL_key}
-                    connection.request(method, path, headers=headers, body=data)
+                    connection.request(
+                        method, path, headers=headers, body=data)
                     response = connection.getresponse()
                     return loads(response.read().decode())
                 finally:
@@ -312,20 +339,24 @@ def main():
             keywords=df['queries'].tolist()
         )
 
-        response = client.post("/keywords_data/google/search_volume/live", post_data)
+        #response = client.post("/keywords_data/google/search_volume/live", post_data)
+        response = client.post(
+            "/dataforseo_labs/google/historical_search_volume/live", post_data)
 
         if response["status_code"] == 20000:
             print(response)
 
         else:
-            print("error. Code: %d Message: %s" % (response["status_code"], response["status_message"]))
+            print("error. Code: %d Message: %s" %
+                  (response["status_code"], response["status_message"]))
 
         from pandas import json_normalize
         response.keys()
         keyword_df = json_normalize(
-            data=response['tasks'][0]['result'])
-
-        keyword_df.rename(columns={'keyword': 'queries'}, inplace=True)
+            # data=response['tasks'][0]['result'])
+            data=response['tasks'][0]['result'][0]['items'])
+        keyword_df.rename(columns={'keyword': 'queries', 'impressions_info.daily_impressions_average': 'search_volume',
+                          'keyword_info.competition': 'competition'}, inplace=True)
 
         placeholder2.info("Merging queries with keyword data ⏳ ...")
         df4_merged = df.merge(keyword_df, how='right', on='queries')
@@ -334,7 +365,8 @@ def main():
         cleanQuery = re.sub('\W+', '', keyword_list[0])
         file_name = cleanQuery + ".csv"
         df4_merged.to_csv(file_name, encoding='utf-8', index=True)
-        csv_download_button = download_button(df4_merged, file_name, 'Download List')
+        csv_download_button = download_button(
+            df4_merged, file_name, 'Download List')
         placeholder2.empty()
 
         progress_bar(list_size)
@@ -358,12 +390,14 @@ def main():
 
         from pandas import Series
 
-        s = df4_merged.apply(lambda x: pd.Series(x['types'], ), axis=1).stack().reset_index(level=1, drop=True)
+        s = df4_merged.apply(lambda x: pd.Series(
+            x['types'], ), axis=1).stack().reset_index(level=1, drop=True)
         s.name = 'types'
         df5 = df4_merged.drop('types', axis=1).join(s)
         df5['types'] = pd.Series(df5['types'], dtype=object)
 
-        p = df5.apply(lambda x: pd.Series(x['entities'], ), axis=1).stack().reset_index(level=1, drop=True)
+        p = df5.apply(lambda x: pd.Series(x['entities'], ), axis=1).stack(
+        ).reset_index(level=1, drop=True)
         p.name = 'entities'
 
         df6 = df5.drop('entities', axis=1).join(p)
@@ -375,7 +409,8 @@ def main():
         import numpy as np
 
         # 1 Visualizing top entities
-        fig1 = px.histogram(df6, x='entities').update_xaxes(categoryorder="total descending")
+        fig1 = px.histogram(df6, x='entities').update_xaxes(
+            categoryorder="total descending")
 
         # in order to have a single root node
         df6['all'] = 'all'
